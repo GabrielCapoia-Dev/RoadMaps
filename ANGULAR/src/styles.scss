@@ -1771,6 +1771,16 @@ app-tour p {
 .app-shell.editor-mode .editor-inspector.has-node .inspector-popover {
   pointer-events: auto;
 }
+.app-shell.editor-mode .editor-inspector.has-node .inspector-rail {
+  align-self: stretch;
+  min-height: calc(100vh - 106px);
+  margin-left: 10px;
+  padding: 12px 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 8px 24px rgba(50, 16, 94, .08);
+}
 .app-shell.editor-mode .editor-inspector:not(.info-open):not(.has-node) {
   padding: 14px 8px;
 }
