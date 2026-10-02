@@ -4719,6 +4719,29 @@
           "title"
         ]
       },
+      "RoadmapAccessDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "canComment": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "role",
+          "canEdit",
+          "canManage",
+          "canComment"
+        ]
+      },
       "PositionDto": {
         "type": "object",
         "properties": {
@@ -4855,6 +4878,14 @@
       "RoadmapResponseDto": {
         "type": "object",
         "properties": {
+          "access": {
+            "description": "Permissões do solicitante, retornadas na leitura do roadmap.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RoadmapAccessDto"
+              }
+            ]
+          },
           "id": {
             "type": "string",
             "format": "uuid"

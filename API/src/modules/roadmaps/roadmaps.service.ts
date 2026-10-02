@@ -36,7 +36,23 @@ export class RoadmapsService {
     return this.repo.categories();
   }
   async get(id: string, userId?: string) {
-    return this.authorize(id, userId, 'read');
+    const roadmap = await this.authorize(id, userId, 'read');
+    const role =
+      roadmap.ownerId === userId ? 'owner' : userId ? await this.repo.role(id, userId) : undefined;
+    return {
+      ...roadmap,
+      access: {
+        role: role ?? 'public',
+        canEdit: role === 'owner' || role === 'editor',
+        canManage: role === 'owner',
+        canComment:
+          !!userId &&
+          (role === 'owner' ||
+            role === 'editor' ||
+            role === 'commenter' ||
+            (!role && roadmap.visibility === 'public')),
+      },
+    };
   }
   // All mutations lock the roadmap before checking membership. Membership revocation,
   // visibility changes, graph saves and study/social writes use the same lock order.

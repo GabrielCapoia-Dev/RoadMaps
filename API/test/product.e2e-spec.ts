@@ -308,8 +308,23 @@ describe('BreadCrumbs API with real PostgreSQL', () => {
       .get(`${base}/roadmaps/${r.id}`)
       .auth(outsider.token, { type: 'bearer' })
       .expect(404);
-    for (const actor of [editor, commenter, viewer])
-      await api().get(`${base}/roadmaps/${r.id}`).auth(actor.token, { type: 'bearer' }).expect(200);
+    for (const [actor, role] of [
+      [owner, 'owner'],
+      [editor, 'editor'],
+      [commenter, 'commenter'],
+      [viewer, 'viewer'],
+    ] as const) {
+      const response = await api()
+        .get(`${base}/roadmaps/${r.id}`)
+        .auth(actor.token, { type: 'bearer' })
+        .expect(200);
+      expect((response.body as RoadmapResponseDto).access).toEqual({
+        role,
+        canEdit: role === 'owner' || role === 'editor',
+        canManage: role === 'owner',
+        canComment: role !== 'viewer',
+      });
+    }
     await api()
       .patch(`${base}/roadmaps/${r.id}`)
       .auth(editor.token, { type: 'bearer' })

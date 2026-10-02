@@ -197,7 +197,18 @@ export class MyRoadmapsQuery extends PageQuery {
   @IsIn(['all', 'owned', 'shared', 'favorite', 'follow'])
   filter = 'all';
 }
+export class RoadmapAccessDto {
+  @ApiProperty() role!: string;
+  @ApiProperty() canEdit!: boolean;
+  @ApiProperty() canManage!: boolean;
+  @ApiProperty() canComment!: boolean;
+}
 export class RoadmapResponseDto {
+  @ApiPropertyOptional({
+    type: RoadmapAccessDto,
+    description: 'Permissões do solicitante, retornadas na leitura do roadmap.',
+  })
+  access?: RoadmapAccessDto;
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ format: 'uuid' }) ownerId!: string;
   @ApiProperty() authorName!: string;
