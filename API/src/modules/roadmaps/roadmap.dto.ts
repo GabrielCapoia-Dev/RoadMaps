@@ -64,6 +64,39 @@ export class NodeDto {
   @IsString()
   @Length(1, 40)
   shape?: string;
+  @ApiPropertyOptional({ example: 'layers' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z][a-z0-9_-]{0,39}$/)
+  icon?: string;
+  @ApiPropertyOptional({ enum: ['horizontal', 'vertical'] })
+  @IsOptional()
+  @IsIn(['horizontal', 'vertical'])
+  layout?: 'horizontal' | 'vertical';
+  @ApiPropertyOptional({ minimum: 120, maximum: 600 })
+  @IsOptional()
+  @IsNumber()
+  @Min(120)
+  @Max(600)
+  width?: number;
+  @ApiPropertyOptional({ minimum: 64, maximum: 420 })
+  @IsOptional()
+  @IsNumber()
+  @Min(64)
+  @Max(420)
+  height?: number;
+  @ApiPropertyOptional({ minimum: 0.2, maximum: 1 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0.2)
+  @Max(1)
+  opacity?: number;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  @Min(-10000)
+  @Max(10000)
+  zIndex?: number;
   @ApiPropertyOptional({ type: [ResourceDto] })
   @IsArray()
   @ArrayMaxSize(30)
@@ -95,6 +128,18 @@ export class EdgeDto {
     'path';
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(120) label?: string;
   @ApiPropertyOptional() @IsOptional() @Matches(/^#[a-fA-F0-9]{6}$/) color?: string;
+  @ApiPropertyOptional({ minimum: 1, maximum: 12 })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(12)
+  strokeWidth?: number;
+  @ApiPropertyOptional({ minimum: 0.1, maximum: 1 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0.1)
+  @Max(1)
+  opacity?: number;
 }
 export class GraphDto {
   @ApiProperty({ type: [NodeDto], maxItems: 1000 })

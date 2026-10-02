@@ -4806,6 +4806,38 @@
             "type": "string",
             "example": "rounded"
           },
+          "icon": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,39}$",
+            "example": "layers"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "horizontal",
+              "vertical"
+            ]
+          },
+          "width": {
+            "type": "number",
+            "minimum": 120,
+            "maximum": 600
+          },
+          "height": {
+            "type": "number",
+            "minimum": 64,
+            "maximum": 420
+          },
+          "opacity": {
+            "type": "number",
+            "minimum": 0.2,
+            "maximum": 1
+          },
+          "zIndex": {
+            "type": "integer",
+            "minimum": -10000,
+            "maximum": 10000
+          },
           "resources": {
             "type": "array",
             "items": {
@@ -4844,6 +4876,16 @@
           },
           "color": {
             "type": "string"
+          },
+          "strokeWidth": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "opacity": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 1
           }
         },
         "required": [

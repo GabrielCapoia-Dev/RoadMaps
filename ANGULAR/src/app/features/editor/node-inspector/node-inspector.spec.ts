@@ -35,6 +35,12 @@ describe('Node inspector drafts', () => {
       ...node,
       title: 'Uma nova ideia',
       shape: 'rounded',
+      icon: 'layers',
+      layout: 'horizontal',
+      width: 192,
+      height: 84,
+      opacity: 1,
+      zIndex: 0,
     });
   });
 });

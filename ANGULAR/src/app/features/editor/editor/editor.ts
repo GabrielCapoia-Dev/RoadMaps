@@ -6,6 +6,7 @@ import {
   effect,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -90,7 +91,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
               <app-icon name="redo" /></button
             ><span class="soft-badge"
               >{{ graph().nodes.length }} etapas · {{ graph().edges.length }} conexões</span
-            >
+            ><button class="icon-button" aria-label="Organizar mapa automaticamente" (click)="autoArrange()"><app-icon name="rotate" /></button><button class="icon-button" aria-label="Ajustar mapa à tela" (click)="fitMap()"><app-icon name="fit" /></button>
           </div>
           <app-graph-canvas
             [graph]="graph()"
@@ -99,10 +100,10 @@ import { ShareDialog } from '../share-dialog/share-dialog';
             (selectedChange)="select($event)"
             (graphChange)="change($event)"
             (edgeRemoved)="removeEdge($event)"
+            (selectedEdgeChange)="selectEdge($event)"
           />
           <p class="editor-help">
-            Arraste as etapas e ligue os pontos para conectar ideias. Use os botões abaixo e o
-            painel lateral para editar também pelo teclado.
+            Arraste as etapas, puxe uma conexão entre os pontos e clique em uma linha para editar seu estilo. Botão direito remove a linha.
           </p>
           @if (inspectorDirty()) {
             <p class="hint">Aplique os detalhes da etapa antes de salvar o roadmap.</p>
@@ -123,75 +124,6 @@ import { ShareDialog } from '../share-dialog/share-dialog';
               </button>
             </div>
           }
-          <details class="panel editor-connection-panel" style="margin-top:22px">
-            <summary>Conexões da trilha</summary>
-            <form (submit)="connect($event)" style="margin-top:18px">
-              <div class="two-fields">
-                <label
-                  >Etapa de origem<select [formField]="connectionFields.source">
-                    <option value="">Selecione</option>
-                    @for (node of graph().nodes; track node.id) {
-                      <option [value]="node.id">{{ node.title }}</option>
-                    }
-                  </select></label
-                ><label
-                  >Próxima etapa<select [formField]="connectionFields.target">
-                    <option value="">Selecione</option>
-                    @for (node of graph().nodes; track node.id) {
-                      <option [value]="node.id">{{ node.title }}</option>
-                    }
-                  </select></label
-                >
-              </div>
-              <button
-                class="button secondary"
-                [disabled]="
-                  !connectionModel().source ||
-                  !connectionModel().target ||
-                  connectionModel().source === connectionModel().target
-                "
-              >
-                <app-icon name="link" />Conectar etapas
-              </button>
-            </form>
-            <ul class="compact-list">
-              @for (edge of graph().edges; track edge.id) {
-                <li>
-                  <span
-                    >{{ nodeTitle(edge.source) }} → {{ nodeTitle(edge.target) }}<small
-                      >Botão direito na linha remove a conexão</small
-                    ></span
-                  ><select
-                    [value]="connectionType(edge)"
-                    aria-label="Formato da conexão"
-                    (change)="setEdgeType(edge.id, $event)"
-                  >
-                    <option value="straight">Reta</option>
-                    <option value="segment">Ângulos</option>
-                    <option value="bezier">Curva</option>
-                    <option value="adaptive">Curva adaptativa</option>
-                  </select><select
-                    [value]="edge.color || '#7c91b8'"
-                    aria-label="Cor da conexão"
-                    (change)="setEdgeColor(edge.id, $event)"
-                  >
-                    <option value="#7c91b8">Cinza azul</option>
-                    <option value="#7c3aed">Violeta</option>
-                    <option value="#a855f7">Lilás</option>
-                    <option value="#d946ef">Roxo</option>
-                    <option value="#14b8a6">Turquesa</option>
-                  </select
-                  ><button
-                    class="icon-button"
-                    aria-label="Remover conexão"
-                    (click)="removeEdge(edge.id)"
-                  >
-                    <app-icon name="x" />
-                  </button>
-                </li>
-              }
-            </ul>
-          </details>
         </section>
         <aside class="editor-inspector" [attr.inert]="busy() ? '' : null">
           @if (selectedNode(); as node) {
@@ -201,7 +133,28 @@ import { ShareDialog } from '../share-dialog/share-dialog';
               (draftChanged)="inspectorDirty.set($event)"
               (duplicate)="duplicateNode()"
               (remove)="removeNode()"
+              (layerChange)="moveLayer($event)"
             />
+          } @else if (selectedEdge(); as edge) {
+            <div class="inspector-title"><app-icon name="link" /><div><h2>Conexão selecionada</h2><p class="hint">Botão direito na linha remove.</p></div></div>
+            <section class="inspector-section">
+              <h3><app-icon name="edit" />Tipo de traçado</h3>
+              <div class="visual-preset-grid edge-preset-grid">
+                @for (preset of edgePresets; track preset.value) {
+                  <button type="button" class="visual-preset" [class.active]="connectionType(edge) === preset.value" (click)="setEdgeType(edge.id, preset.value)"><span class="edge-preview" [attr.data-edge-type]="preset.value"></span><small>{{ preset.label }}</small></button>
+                }
+              </div>
+            </section>
+            <section class="inspector-section">
+              <h3><app-icon name="sparkles" />Cor, espessura e opacidade</h3>
+              <div class="color-preset-grid">
+                @for (preset of edgeColors; track preset.value) { <button type="button" class="color-preset" [class.active]="(edge.color || '#7c91b8') === preset.value" [style.background]="preset.value" [attr.aria-label]="preset.label" (click)="setEdgeColor(edge.id, preset.value)"></button> }
+                <label class="custom-color" aria-label="Cor personalizada"><input type="color" [value]="edge.color || '#7c91b8'" (input)="setEdgeColor(edge.id, $any($event.target).value)" /></label>
+              </div>
+              <label>Espessura <output>{{ edge.strokeWidth || 2 }}px</output><input type="range" min="1" max="12" [value]="edge.strokeWidth || 2" (input)="setEdgeWidth(edge.id, $event)" /></label>
+              <label>Transparência <output>{{ math.round((edge.opacity || 1) * 100) }}%</output><input type="range" min="10" max="100" [value]="(edge.opacity || 1) * 100" (input)="setEdgeOpacity(edge.id, $event)" /></label>
+              <button type="button" class="button danger full-width" (click)="removeEdge(edge.id)"><app-icon name="trash" />Excluir conexão</button>
+            </section>
           } @else {
             <span class="tile blue"><app-icon name="map" /></span>
             <h2 style="margin-top:15px">Seu mapa, suas ideias</h2>
@@ -247,6 +200,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
     }`,
 })
 export class Editor {
+  readonly math = Math;
   private api = inject(Api);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -257,6 +211,11 @@ export class Editor {
   readonly graph = signal<Graph>({ nodes: [], edges: [] });
   readonly selected = signal('');
   readonly selectedNode = computed(() => this.graph().nodes.find((n) => n.id === this.selected()));
+  readonly selectedEdgeId = signal('');
+  readonly selectedEdge = computed(() => this.graph().edges.find((edge) => edge.id === this.selectedEdgeId()));
+  readonly graphCanvas = viewChild(GraphCanvas);
+  readonly edgePresets = [{ value: 'straight', label: 'Reta' }, { value: 'segment', label: 'Ângulos' }, { value: 'bezier', label: 'Curva' }, { value: 'adaptive', label: 'Adaptativa' }];
+  readonly edgeColors = [{ value: '#7c91b8', label: 'Cinza azul' }, { value: '#7c3aed', label: 'Violeta' }, { value: '#a855f7', label: 'Lilás' }, { value: '#d946ef', label: 'Roxo' }, { value: '#14b8a6', label: 'Turquesa' }];
   readonly metadata = signal({ title: '', description: '', category: '' });
   readonly metadataFields = form(this.metadata, (s) => {
     required(s.title);
@@ -266,8 +225,6 @@ export class Editor {
     required(s.category);
     maxLength(s.category, 60);
   });
-  readonly connectionModel = signal({ source: '', target: '' });
-  readonly connectionFields = form(this.connectionModel);
   private baseline = signal('');
   readonly inspectorDirty = signal(false);
   readonly dirty = computed(
@@ -317,6 +274,7 @@ export class Editor {
       this.metadata.set({ title: r.title, description: r.description, category: r.category });
       this.baseline.set(JSON.stringify({ graph: r.graph, metadata: this.metadata() }));
       this.selected.set('');
+      this.selectedEdgeId.set('');
       this.inspectorDirty.set(false);
       this.undoStack.set([]);
       this.redoStack.set([]);
@@ -332,6 +290,13 @@ export class Editor {
       return;
     this.inspectorDirty.set(false);
     this.selected.set(id);
+    this.selectedEdgeId.set('');
+  }
+  selectEdge(id: string) {
+    if (this.inspectorDirty()) return;
+    this.inspectorDirty.set(false);
+    this.selected.set('');
+    this.selectedEdgeId.set(id);
   }
   change(graph: Graph) {
     this.undoStack.update((s) => [...s.slice(-49), this.graph()]);
@@ -356,6 +321,12 @@ export class Editor {
             y: 80 + Math.floor(this.graph().nodes.length / 3) * 160,
           },
           color: '#7c3aed',
+          icon: 'layers',
+          layout: 'horizontal',
+          width: 192,
+          height: 84,
+          opacity: 1,
+          zIndex: this.graph().nodes.length,
           resources: [],
         },
       ],
@@ -390,50 +361,57 @@ export class Editor {
       edges: this.graph().edges.filter((e) => e.source !== id && e.target !== id),
     });
     this.selected.set('');
+    this.selectedEdgeId.set('');
     this.inspectorDirty.set(false);
-  }
-  connect(event: Event) {
-    event.preventDefault();
-    const { source, target } = this.connectionModel();
-    if (
-      !source ||
-      !target ||
-      source === target ||
-      this.graph().edges.some((e) => e.source === source && e.target === target)
-    )
-      return;
-    this.change({
-      ...this.graph(),
-      edges: [
-        ...this.graph().edges,
-        { id: crypto.randomUUID(), source, target, type: 'straight' },
-      ],
-    });
   }
   removeEdge(id: string) {
     this.change({ ...this.graph(), edges: this.graph().edges.filter((e) => e.id !== id) });
+    if (this.selectedEdgeId() === id) this.selectedEdgeId.set('');
   }
   connectionType(edge: Graph['edges'][number]) {
     return ['straight', 'segment', 'bezier', 'adaptive'].includes(edge.type)
       ? edge.type
       : 'straight';
   }
-  setEdgeType(id: string, event: Event) {
-    const type = (event.target as HTMLSelectElement).value;
+  setEdgeType(id: string, type: string) {
     this.change({
       ...this.graph(),
       edges: this.graph().edges.map((edge) => (edge.id === id ? { ...edge, type } : edge)),
     });
   }
-  setEdgeColor(id: string, event: Event) {
-    const color = (event.target as HTMLSelectElement).value;
+  setEdgeColor(id: string, color: string) {
     this.change({
       ...this.graph(),
       edges: this.graph().edges.map((edge) => (edge.id === id ? { ...edge, color } : edge)),
     });
   }
-  nodeTitle(id: string) {
-    return this.graph().nodes.find((n) => n.id === id)?.title ?? '';
+  setEdgeWidth(id: string, event: Event) {
+    this.updateEdge(id, { strokeWidth: Number((event.target as HTMLInputElement).value) });
+  }
+  setEdgeOpacity(id: string, event: Event) {
+    this.updateEdge(id, { opacity: Number((event.target as HTMLInputElement).value) / 100 });
+  }
+  private updateEdge(id: string, patch: Partial<Graph['edges'][number]>) {
+    this.change({ ...this.graph(), edges: this.graph().edges.map((edge) => edge.id === id ? { ...edge, ...patch } : edge) });
+  }
+  moveLayer(direction: 'up' | 'down') {
+    const id = this.selected();
+    const nodes = [...this.graph().nodes].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+    const index = nodes.findIndex((node) => node.id === id);
+    const target = direction === 'up' ? index + 1 : index - 1;
+    if (index < 0 || target < 0 || target >= nodes.length) return;
+    const current = nodes[index].zIndex || index;
+    nodes[index].zIndex = nodes[target].zIndex || target;
+    nodes[target].zIndex = current;
+    this.change({ ...this.graph(), nodes });
+  }
+  autoArrange() {
+    const columns = Math.max(1, Math.ceil(Math.sqrt(this.graph().nodes.length)));
+    this.change({ ...this.graph(), nodes: this.graph().nodes.map((node, index) => ({ ...node, position: { x: 80 + (index % columns) * 270, y: 70 + Math.floor(index / columns) * 170 } })) });
+    setTimeout(() => this.graphCanvas()?.fit(), 0);
+  }
+  fitMap() {
+    this.graphCanvas()?.fit();
   }
   undo() {
     const stack = this.undoStack();

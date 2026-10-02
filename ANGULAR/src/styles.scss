@@ -262,17 +262,6 @@ small {
 .app-shell.editor-mode .editor-node-choices {
   display: none;
 }
-.app-shell.editor-mode .editor-connection-panel {
-  position: absolute;
-  z-index: 20;
-  left: 18px;
-  right: 18px;
-  bottom: 14px;
-  max-height: min(420px, calc(100% - 110px));
-  overflow: auto;
-  margin-top: 0 !important;
-  box-shadow: 0 12px 40px #32105e22;
-}
 .app-shell.editor-mode .editor-inspector {
   height: 100%;
   max-height: none;
@@ -1348,7 +1337,8 @@ app-tour p {
 }
 .f-connection-path {
   stroke: var(--edge-color, #7c91b8) !important;
-  stroke-width: 2 !important;
+  stroke-width: var(--edge-width, 2px) !important;
+  opacity: var(--edge-opacity, 1);
   pointer-events: stroke;
   cursor: context-menu;
 }
@@ -1389,6 +1379,25 @@ app-tour p {
   align-items: center;
   color: var(--navy);
   text-align: left;
+  position: relative;
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+.graph-node[data-layout='vertical'] { flex-direction: column; justify-content: center; text-align: center; }
+.graph-node[data-layout='vertical'] .node-type { margin-bottom: 2px; }
+.graph-node[data-layout='vertical'] .connector.in { top: -7px; }
+.graph-node[data-layout='vertical'] .connector.out { bottom: -7px; }
+.node-resize-handle {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  right: -5px;
+  bottom: -5px;
+  border: 2px solid white;
+  border-radius: 3px;
+  background: var(--node-color);
+  cursor: nwse-resize;
+  padding: 0;
+  z-index: 4;
 }
 .graph-node[data-shape='square'] {
   border-radius: 4px;
@@ -1674,6 +1683,9 @@ app-tour p {
   gap: 0;
   min-height: 700px;
 }
+.app-shell.editor-mode .editor-layout { grid-template-columns: 320px minmax(0, 1fr); }
+.app-shell.editor-mode .editor-main { grid-column: 2; grid-row: 1; }
+.app-shell.editor-mode .editor-inspector { grid-column: 1; grid-row: 1; border-left: 0; border-right: 1px solid var(--border); }
 .editor-main {
   padding: 20px;
   min-width: 0;
@@ -1724,6 +1736,41 @@ app-tour p {
   cursor: pointer;
   margin-bottom: 17px;
 }
+.inspector-title { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 17px; }
+.inspector-title > app-icon { color: var(--blue); background: var(--pale); border-radius: 8px; padding: 7px; width: 34px; height: 34px; }
+.inspector-title h2 { margin: 0; }
+.inspector-title .hint { margin: 3px 0 0; line-height: 1.4; }
+.inspector-section { border-top: 1px solid var(--border); padding-top: 15px; margin-top: 18px; }
+.inspector-section h3 { display: flex; align-items: center; gap: 7px; font-size: 12px; margin: 0 0 12px; }
+.inspector-section h3 app-icon { width: 15px; height: 15px; color: var(--blue); }
+.visual-preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.visual-preset { border: 1px solid var(--border); background: #fff; padding: 6px 3px; border-radius: 8px; color: var(--navy); }
+.visual-preset:hover, .visual-preset.active { border-color: var(--blue); box-shadow: 0 0 0 2px #7c3aed22; }
+.visual-preset small { display: block; font-size: 8px; margin-top: 5px; }
+.preset-card { display: flex; height: 35px; align-items: center; justify-content: center; gap: 3px; background: #faf7ff; border: 2px solid var(--preset-color); color: var(--preset-color); font-size: 9px; }
+.preset-card app-icon { width: 13px; height: 13px; }
+.preset-card[data-shape='rounded'] { border-radius: 7px; }
+.preset-card[data-shape='square'] { border-radius: 2px; }
+.preset-card[data-shape='pill'] { border-radius: 20px; }
+.preset-card[data-shape='outlined'] { background: transparent; border-width: 1px; box-shadow: none; }
+.preset-card[data-shape='compact'] { height: 27px; }
+.color-preset-grid, .icon-preset-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.color-preset { width: 25px; height: 25px; padding: 0; border: 2px solid white; outline: 1px solid var(--border); border-radius: 50%; }
+.color-preset.active { outline: 2px solid var(--navy); outline-offset: 2px; }
+.custom-color input { width: 28px; height: 28px; padding: 0; border: 0; background: transparent; }
+.icon-preset { width: 29px; height: 29px; border: 1px solid var(--border); background: white; color: var(--muted); border-radius: 7px; padding: 6px; }
+.icon-preset.active, .icon-preset:hover { color: var(--blue); border-color: var(--blue); background: var(--pale); }
+.segmented-control { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
+.segmented-control button { border: 1px solid var(--border); background: white; border-radius: 7px; padding: 7px 4px; font-size: 9px; color: var(--muted); }
+.segmented-control button.active { color: var(--blue); border-color: var(--blue); background: var(--pale); }
+.layout-preview { display: inline-flex; gap: 2px; vertical-align: middle; margin-right: 3px; }
+.layout-preview i, .layout-preview b { display: block; width: 7px; height: 7px; border-radius: 2px; background: currentColor; }
+.layout-preview.horizontal { align-items: center; }.layout-preview.vertical { flex-direction: column; align-items: center; }
+.inspector-section output { float: right; color: var(--muted); font-size: 10px; }
+.inspector-section input[type='range'] { width: 100%; padding: 0; accent-color: var(--blue); }
+.layer-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }.layer-buttons .button { font-size: 9px; padding: 8px 4px; }
+.edge-preview { height: 20px; display: block; position: relative; }.edge-preview::after { content: ''; position: absolute; left: 5px; right: 5px; top: 9px; border-top: 3px solid var(--blue); }
+.edge-preview[data-edge-type='segment']::after { border-top-style: dashed; }.edge-preview[data-edge-type='bezier']::after { border-radius: 50%; transform: skewY(-12deg); }.edge-preview[data-edge-type='adaptive']::after { border-top-style: dotted; }
 .editor-help {
   font-size: 10px;
   color: var(--muted);
@@ -2060,6 +2107,21 @@ app-tour p {
   }
 }
 @media (max-width: 700px) {
+  .app-shell.editor-mode .editor-layout {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+  .app-shell.editor-mode .editor-heading {
+    padding: 10px 12px;
+  }
+  .app-shell.editor-mode .editor-heading h1 {
+    font-size: 14px;
+  }
+  .app-shell.editor-mode .editor-actions .button:not(.primary) {
+    display: none;
+  }
+  .app-shell.editor-mode .editor-inspector {
+    padding: 12px;
+  }
   .sidebar {
     display: none;
     width: 260px;

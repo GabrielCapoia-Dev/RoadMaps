@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal, viewChild } from '@angular/core';
 import {
   FFlowModule,
   FCanvasComponent,
@@ -29,6 +29,9 @@ import { Icon } from '../icon/icon';
             [fReassignDisabled]="true"
             [attr.data-edge-type]="connectionType(edge)"
             [style.--edge-color]="edge.color || '#7c91b8'"
+            [style.--edge-width]="(edge.strokeWidth || 2) + 'px'"
+            [style.--edge-opacity]="edge.opacity || 1"
+            (click)="selectedEdgeChange.emit(edge.id)"
             (contextmenu)="removeConnection($event, edge.id)"
           />
         }
@@ -40,6 +43,12 @@ import { Icon } from '../icon/icon';
             [fNodePosition]="node.position"
             [fNodeDraggingDisabled]="!editable()"
             [attr.data-shape]="node.shape || 'rounded'"
+            [attr.data-layout]="node.layout || 'horizontal'"
+            [style.width.px]="sizeFor(node).width"
+            [style.min-height.px]="sizeFor(node).height"
+            [style.height.px]="sizeFor(node).height"
+            [style.opacity]="node.opacity || 1"
+            [style.z-index]="node.zIndex || 0"
             class="graph-node"
             [class.selected]="selected() === node.id"
             [style.--node-color]="node.color || '#7c3aed'"
@@ -60,18 +69,7 @@ import { Icon } from '../icon/icon';
               [fConnectorMultiple]="true"
               [fConnectorDisabled]="!editable()"
             ></div>
-            <span class="node-type"
-              ><app-icon
-                [name]="
-                  node.type === 'project'
-                    ? 'flag'
-                    : node.type === 'resource'
-                      ? 'link'
-                      : node.type === 'task'
-                        ? 'check'
-                        : 'layers'
-                "
-            /></span>
+            <span class="node-type"><app-icon [name]="nodeIcon(node)" /></span>
             <div>
               <strong>{{ node.title }}</strong
               ><small
@@ -88,6 +86,14 @@ import { Icon } from '../icon/icon';
               [fConnectorMultiple]="true"
               [fConnectorDisabled]="!editable()"
             ></div>
+            @if (editable()) {
+              <button
+                class="node-resize-handle"
+                type="button"
+                aria-label="Redimensionar etapa"
+                (pointerdown)="startResize($event, node)"
+              ></button>
+            }
           </div>
         }
         <f-connection-for-create /> </f-canvas
@@ -116,9 +122,14 @@ export class GraphCanvas {
   readonly graphChange = output<Graph>();
   readonly selectedChange = output<string>();
   readonly edgeRemoved = output<string>();
+  readonly selectedEdgeChange = output<string>();
   readonly canvas = viewChild(FCanvasComponent);
   readonly zoom = viewChild(FZoomDirective);
   private fitted = false;
+  private resizeState:
+    | { id: string; startX: number; startY: number; width: number; height: number }
+    | undefined;
+  readonly resizeDraft = signal<Record<string, { width: number; height: number }>>({});
   initialFit() {
     if (!this.fitted && this.graph().nodes.length) {
       this.fit();
@@ -152,6 +163,70 @@ export class GraphCanvas {
       edges: [...this.graph().edges, { id: crypto.randomUUID(), source, target, type: 'straight' }],
     });
   }
+  nodeIcon(node: Graph['nodes'][number]) {
+    return (
+      node.icon ||
+      (node.type === 'project'
+        ? 'flag'
+        : node.type === 'resource'
+          ? 'link'
+          : node.type === 'task'
+            ? 'check'
+            : 'layers')
+    );
+  }
+  sizeFor(node: Graph['nodes'][number]) {
+    return this.resizeDraft()[node.id] ?? {
+      width: node.width || 192,
+      height: node.height || 84,
+    };
+  }
+  startResize(event: PointerEvent, node: Graph['nodes'][number]) {
+    if (!this.editable()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const size = this.sizeFor(node);
+    this.resizeState = {
+      id: node.id,
+      startX: event.clientX,
+      startY: event.clientY,
+      width: size.width,
+      height: size.height,
+    };
+    document.addEventListener('pointermove', this.resizeMove);
+    document.addEventListener('pointerup', this.resizeEnd, { once: true });
+  }
+  private resizeMove = (event: PointerEvent) => {
+    const state = this.resizeState;
+    if (!state) return;
+    this.resizeDraft.update((draft) => ({
+      ...draft,
+      [state.id]: {
+        width: Math.min(600, Math.max(120, state.width + event.clientX - state.startX)),
+        height: Math.min(420, Math.max(64, state.height + event.clientY - state.startY)),
+      },
+    }));
+  };
+  private resizeEnd = () => {
+    const state = this.resizeState;
+    if (!state) return;
+    const size = this.resizeDraft()[state.id];
+    this.resizeState = undefined;
+    document.removeEventListener('pointermove', this.resizeMove);
+    if (size) {
+      this.graphChange.emit({
+        ...this.graph(),
+        nodes: this.graph().nodes.map((node) =>
+          node.id === state.id ? { ...node, width: size.width, height: size.height } : node,
+        ),
+      });
+      this.resizeDraft.update((draft) => {
+        const next = { ...draft };
+        delete next[state.id];
+        return next;
+      });
+    }
+  };
   connectionType(edge: Graph['edges'][number]) {
     return ['straight', 'segment', 'bezier', 'adaptive'].includes(edge.type)
       ? edge.type

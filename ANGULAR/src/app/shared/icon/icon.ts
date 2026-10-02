@@ -39,6 +39,9 @@ const paths: Record<string, string> = {
   flag: 'M4 22V3h16l-4 5 4 5H4',
   briefcase: 'M3 7h18v14H3z M8 7V3h8v4 M3 12h18',
   sun: 'M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0 M12 2v2 M12 20v2 M2 12h2 M20 12h2 M5 5l1 1 M18 18l1 1 M5 19l1-1 M18 6l1-1',
+  up: 'm6 15 6-6 6 6',
+  down: 'm6 9 6 6 6-6',
+  rotate: 'M4 12a8 8 0 0 1 14-5l2 2 M20 4v5h-5 M20 12a8 8 0 0 1-14 5l-2-2 M4 20v-5h5',
 };
 @Component({
   selector: 'app-icon',

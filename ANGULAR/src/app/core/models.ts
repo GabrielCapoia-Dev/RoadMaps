@@ -30,6 +30,12 @@ export interface StudyNode {
   position: { x: number; y: number };
   color?: string;
   shape?: string;
+  icon?: string;
+  layout?: 'horizontal' | 'vertical';
+  width?: number;
+  height?: number;
+  opacity?: number;
+  zIndex?: number;
   resources: { label: string; url: string }[];
 }
 export interface StudyEdge {
@@ -39,6 +45,8 @@ export interface StudyEdge {
   type: string;
   label?: string;
   color?: string;
+  strokeWidth?: number;
+  opacity?: number;
 }
 export interface Graph {
   nodes: StudyNode[];
