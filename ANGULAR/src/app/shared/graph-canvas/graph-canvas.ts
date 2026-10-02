@@ -102,7 +102,9 @@ import { Icon } from '../icon/icon';
           </div>
         }
         <f-connection-for-create />
-        <svg #drawSurface class="draw-layer" [class.active]="!!drawTool()" viewBox="0 0 1800 1100" preserveAspectRatio="none" (pointerdown)="beginDraw($event)" (pointermove)="moveDraw($event)" (pointerup)="endDraw($event)" (pointercancel)="cancelDraw($event)">
+        </f-canvas
+    ></f-flow>
+    <svg #drawSurface class="draw-layer" [class.active]="!!drawTool()" viewBox="0 0 1800 1100" preserveAspectRatio="none" (pointerdown)="beginDraw($event)" (pointermove)="moveDraw($event)" (pointerup)="endDraw($event)" (pointercancel)="cancelDraw($event)">
           @for (item of graph().drawings || []; track item.id) {
             @if (item.kind === 'freehand') { <polyline [attr.points]="pointsAttribute(item.points || [item.from, item.to])" fill="none" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" stroke-linecap="round" stroke-linejoin="round" /> }
             @if (item.kind === 'line' || item.kind === 'arrow') { <line [attr.x1]="item.from.x" [attr.y1]="item.from.y" [attr.x2]="item.to.x" [attr.y2]="item.to.y" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" [attr.marker-end]="item.kind === 'arrow' ? 'url(#draw-arrow)' : null" /> }
@@ -116,9 +118,7 @@ import { Icon } from '../icon/icon';
             @else { <line [attr.x1]="preview.from.x" [attr.y1]="preview.from.y" [attr.x2]="preview.to.x" [attr.y2]="preview.to.y" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4" /> }
           }
           <defs><marker id="draw-arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="context-stroke" /></marker></defs>
-        </svg>
-        </f-canvas
-    ></f-flow>
+    </svg>
     <div class="graph-controls" aria-label="Controles do mapa">
       <button class="icon-button" (click)="zoom()?.zoomOut()" aria-label="Diminuir zoom">
         <app-icon name="minus" /></button
