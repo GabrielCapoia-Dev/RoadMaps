@@ -28,7 +28,7 @@ export class SharePreviewController {
     const title = `${roadmap.title} · BreadCrumbs`;
     const description =
       roadmap.description || `Trilha de conhecimento criada por ${roadmap.authorName}.`;
-    const image = `${appUrl}/brand-mark.svg`;
+    const image = `${appUrl}/share-card.png`;
 
     return `<!doctype html>
 <html lang="pt-BR">
@@ -42,8 +42,11 @@ export class SharePreviewController {
     <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:url" content="${escapeHtml(url)}">
     <meta property="og:image" content="${escapeHtml(image)}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1536">
+    <meta property="og:image:height" content="1024">
     <meta property="og:image:alt" content="${escapeHtml(roadmap.title)}">
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHtml(title)}">
     <meta name="twitter:description" content="${escapeHtml(description)}">
     <link rel="canonical" href="${escapeHtml(url)}">
