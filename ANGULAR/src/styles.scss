@@ -1754,8 +1754,9 @@ app-tour p {
     align-items: flex-start;
     gap: 0;
     padding: 14px 0 14px 10px;
-    background: rgba(255, 255, 255, .97);
-    box-shadow: -18px 0 40px rgba(50, 16, 94, .10);
+    background: transparent;
+    box-shadow: none;
+    pointer-events: none;
 }
 .app-shell.editor-mode .editor-inspector.has-node app-node-inspector {
   width: 100%;
@@ -1764,6 +1765,11 @@ app-tour p {
   flex-direction: row-reverse;
   align-items: flex-start;
   gap: 0;
+  pointer-events: none;
+}
+.app-shell.editor-mode .editor-inspector.has-node .inspector-rail,
+.app-shell.editor-mode .editor-inspector.has-node .inspector-popover {
+  pointer-events: auto;
 }
 .app-shell.editor-mode .editor-inspector:not(.info-open):not(.has-node) {
   padding: 14px 8px;
