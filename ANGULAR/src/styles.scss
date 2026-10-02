@@ -1398,13 +1398,15 @@ app-tour p {
 .graph-surface f-flow {
   height: 520px;
   display: block;
+  position: relative;
 }
 .graph-surface f-canvas {
   display: block;
   height: 100%;
+  position: relative;
 }
-.draw-layer { position: absolute; inset: 0; width: 1800px; height: 1100px; pointer-events: none; overflow: visible; z-index: 20; }
-.draw-layer.active { pointer-events: all; cursor: crosshair; }
+.draw-layer { position: absolute; inset: 0; width: 1800px; height: 1100px; pointer-events: none; overflow: visible; z-index: 1000; }
+.draw-layer.active { pointer-events: auto !important; cursor: crosshair; touch-action: none; }
 .draw-layer.active > * { pointer-events: none; }
 .draw-layer text { user-select: none; }
 .draw-tools { display: inline-flex; gap: 3px; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--border); }
