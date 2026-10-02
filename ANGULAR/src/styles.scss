@@ -1757,6 +1757,13 @@ app-tour p {
     background: rgba(255, 255, 255, .97);
     box-shadow: -18px 0 40px rgba(50, 16, 94, .10);
 }
+.app-shell.editor-mode .editor-inspector.has-node app-node-inspector {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
 .app-shell.editor-mode .editor-inspector:not(.info-open):not(.has-node) {
   padding: 14px 8px;
 }
