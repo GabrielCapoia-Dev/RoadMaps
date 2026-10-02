@@ -1,0 +1,22 @@
+{
+  "name": "roadmaps-foundation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Development tooling and generated API documentation",
+  "engines": {
+    "node": "^24.15.0 || ^26.0.0"
+  },
+  "scripts": {
+    "build": "npm --prefix API run build && npm --prefix ANGULAR run build",
+    "lint": "npm --prefix API run lint && npm --prefix ANGULAR run lint",
+    "test": "npm --prefix API test && npm --prefix API run test:e2e && npm --prefix ANGULAR test -- --watch=false",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "docs:generate": "npm --prefix API run docs:openapi && node scripts/generate-postman.mjs",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "openapi-to-postmanv2": "6.3.3",
+    "prettier": "3.9.9"
+  }
+}

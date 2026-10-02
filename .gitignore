@@ -6,3 +6,17 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Build, coverage and tool caches
+dist/
+coverage/
+.angular/
+.cache/
+*.tsbuildinfo
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Local diagnostics and temporary files
+.local/

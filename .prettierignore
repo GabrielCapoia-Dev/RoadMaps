@@ -1,0 +1,8 @@
+**/node_modules
+**/dist
+**/coverage
+**/.angular
+**/package-lock.json
+docs/openapi/openapi.json
+docs/postman/*.json
+.local
