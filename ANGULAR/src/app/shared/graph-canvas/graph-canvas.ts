@@ -44,9 +44,8 @@ import { Icon } from '../icon/icon';
             [fNodeDraggingDisabled]="!editable()"
             [attr.data-shape]="node.shape || 'rounded'"
             [attr.data-layout]="node.layout || 'horizontal'"
-            [style.width.px]="sizeFor(node).width"
-            [style.min-height.px]="sizeFor(node).height"
-            [style.height.px]="sizeFor(node).height"
+            [style.--node-width]="sizeFor(node).width + 'px'"
+            [style.--node-height]="sizeFor(node).height + 'px'"
             [style.opacity]="node.opacity || 1"
             [style.z-index]="node.zIndex || 0"
             class="graph-node"
@@ -178,8 +177,8 @@ export class GraphCanvas {
   }
   sizeFor(node: Graph['nodes'][number]) {
     return this.resizeDraft()[node.id] ?? {
-      width: node.width || 192,
-      height: node.height || 84,
+      width: Math.max(220, node.width || 220),
+      height: Math.max(96, node.height || 96),
     };
   }
   startResize(event: PointerEvent, node: Graph['nodes'][number]) {
