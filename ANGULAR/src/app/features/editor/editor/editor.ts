@@ -91,18 +91,16 @@ import { ShareDialog } from '../share-dialog/share-dialog';
               <app-icon name="redo" /></button
             ><span class="soft-badge"
               >{{ graph().nodes.length }} etapas · {{ graph().edges.length }} conexões</span
-            ><button class="icon-button" aria-label="Organizar mapa automaticamente" (click)="autoArrange()"><app-icon name="rotate" /></button><button class="icon-button" aria-label="Ajustar mapa à tela" (click)="fitMap()"><app-icon name="fit" /></button><span class="draw-tools" aria-label="Ferramentas de anotação">@for (tool of drawTools; track tool.value) { <button type="button" class="icon-button" [class.active]="drawTool() === tool.value" [attr.aria-label]="tool.label" [title]="tool.label" (click)="drawTool.set(drawTool() === tool.value ? '' : tool.value)"><app-icon [name]="tool.icon" /></button> }</span>
+            ><button class="icon-button" aria-label="Organizar mapa automaticamente" (click)="autoArrange()"><app-icon name="rotate" /></button><button class="icon-button" aria-label="Ajustar mapa à tela" (click)="fitMap()"><app-icon name="fit" /></button>
           </div>
           <app-graph-canvas
             [graph]="graph()"
             [editable]="true"
             [selected]="selected()"
             [selectedIds]="selectedIds()"
-            [drawTool]="drawTool()"
             (selectedChange)="select($event)"
             (selectionChange)="selectMany($event)"
             (contextMenu)="openContextMenu($event)"
-            (drawToolChange)="drawTool.set($event)"
             (graphChange)="change($event)"
             (edgeRemoved)="removeEdge($event)"
             (selectedEdgeChange)="selectEdge($event)"
@@ -227,8 +225,6 @@ export class Editor {
   readonly graph = signal<Graph>({ nodes: [], edges: [] });
   readonly selected = signal('');
   readonly selectedIds = signal<string[]>([]);
-  readonly drawTool = signal<'' | 'freehand' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon' | 'image'>('');
-  readonly drawTools = [{ value: 'freehand' as const, label: 'Desenhar livremente', icon: 'edit' }, { value: 'line' as const, label: 'Desenhar reta', icon: 'minus' }, { value: 'arrow' as const, label: 'Desenhar seta', icon: 'arrow' }, { value: 'rectangle' as const, label: 'Desenhar quadrado', icon: 'square' }, { value: 'circle' as const, label: 'Desenhar círculo', icon: 'circle' }, { value: 'text' as const, label: 'Adicionar texto solto', icon: 'edit' }, { value: 'icon' as const, label: 'Adicionar ícone', icon: 'sparkles' }, { value: 'image' as const, label: 'Colar imagem', icon: 'camera' }];
   readonly contextMenu = signal<{ x: number; y: number } | null>(null);
   readonly infoPanelOpen = signal(false);
   readonly selectedNode = computed(() => this.graph().nodes.find((n) => n.id === this.selected()));
@@ -291,9 +287,9 @@ export class Editor {
         return;
       }
       this.roadmap.set(r);
-      this.graph.set(r.graph);
+      this.graph.set(this.withoutDrawings(r.graph));
       this.metadata.set({ title: r.title, description: r.description, category: r.category });
-      this.baseline.set(JSON.stringify({ graph: r.graph, metadata: this.metadata() }));
+      this.baseline.set(JSON.stringify({ graph: this.graph(), metadata: this.metadata() }));
       this.selected.set('');
       this.selectedEdgeId.set('');
       this.selectedIds.set([]);
@@ -348,7 +344,11 @@ export class Editor {
   change(graph: Graph) {
     this.undoStack.update((s) => [...s.slice(-49), this.graph()]);
     this.redoStack.set([]);
-    this.graph.set(graph);
+    this.graph.set(this.withoutDrawings(graph));
+  }
+  private withoutDrawings(graph: Graph): Graph {
+    const { drawings: _drawings, ...cleanGraph } = graph;
+    return cleanGraph;
   }
   addNode() {
     const id = crypto.randomUUID();

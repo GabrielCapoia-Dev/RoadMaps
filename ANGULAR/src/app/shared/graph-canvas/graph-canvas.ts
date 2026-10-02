@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal, viewChild } from '@angular/core';
 import {
   FFlowModule,
   FCanvasComponent,
@@ -6,13 +6,13 @@ import {
   FCreateConnectionEvent,
   FMoveNodesEvent,
 } from '@foblex/flow';
-import type { DrawItem, Graph } from '../../core/models';
+import type { Graph } from '../../core/models';
 import { Icon } from '../icon/icon';
 @Component({
   selector: 'app-graph-canvas',
   imports: [FFlowModule, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: ` <div class="graph-surface" aria-label="Mapa visual da trilha" (window:paste)="pasteDrawing($event)">
+  template: ` <div class="graph-surface" aria-label="Mapa visual da trilha">
     <f-flow
       fDraggable
       (fMoveNodes)="move($event)"
@@ -102,32 +102,8 @@ import { Icon } from '../icon/icon';
           </div>
         }
         <f-connection-for-create />
-        </f-canvas
+    </f-canvas
     ></f-flow>
-    <svg #drawSurface class="draw-layer" [class.active]="!!drawTool()" viewBox="0 0 1800 1100" preserveAspectRatio="none" (pointerdown)="beginDraw($event)" (pointermove)="moveDraw($event)" (pointerup)="endDraw($event)" (pointercancel)="cancelDraw($event)">
-          @for (item of graph().drawings || []; track item.id) {
-            @if (item.kind === 'freehand') { <polyline [attr.points]="pointsAttribute(item.points || [item.from, item.to])" fill="none" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" stroke-linecap="round" stroke-linejoin="round" /> }
-            @if (item.kind === 'line' || item.kind === 'arrow') { <line [attr.x1]="item.from.x" [attr.y1]="item.from.y" [attr.x2]="item.to.x" [attr.y2]="item.to.y" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" [attr.marker-end]="item.kind === 'arrow' ? 'url(#draw-arrow)' : null" /> }
-            @if (item.kind === 'rectangle') { <rect [attr.x]="Math.min(item.from.x, item.to.x)" [attr.y]="Math.min(item.from.y, item.to.y)" [attr.width]="Math.abs(item.to.x - item.from.x)" [attr.height]="Math.abs(item.to.y - item.from.y)" fill="none" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" /> }
-            @if (item.kind === 'circle') { <ellipse [attr.cx]="(item.from.x + item.to.x) / 2" [attr.cy]="(item.from.y + item.to.y) / 2" [attr.rx]="Math.abs(item.to.x - item.from.x) / 2" [attr.ry]="Math.abs(item.to.y - item.from.y) / 2" fill="none" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" /> }
-            @if (item.kind === 'text') { <text [attr.x]="item.position.x" [attr.y]="item.position.y" [attr.fill]="item.color" [attr.font-size]="item.fontSize" [attr.opacity]="item.opacity">{{ item.text }}</text> }
-            @if (item.kind === 'icon') { <text [attr.x]="item.position.x" [attr.y]="item.position.y" [attr.fill]="item.color" font-size="28" [attr.opacity]="item.opacity">✦</text> }
-            @if (item.kind === 'image') { <image [attr.x]="item.position.x" [attr.y]="item.position.y" [attr.width]="item.width" [attr.height]="item.height" [attr.href]="item.src" preserveAspectRatio="xMidYMid meet" [attr.opacity]="item.opacity" /> }
-          }
-          @if (drawPreview(); as preview) {
-            @if (drawTool() === 'freehand') { <polyline [attr.points]="pointsAttribute(preview.points)" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4" stroke-linecap="round" /> }
-            @else { <line [attr.x1]="preview.from.x" [attr.y1]="preview.from.y" [attr.x2]="preview.to.x" [attr.y2]="preview.to.y" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4" /> }
-          }
-          <defs><marker id="draw-arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="context-stroke" /></marker></defs>
-    </svg>
-    <input #imageInput class="draw-image-input" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" (change)="importImage($event)" />
-    @if (drawTool()) { <div class="draw-mode-hint">{{ drawToolLabel() }} · arraste no canvas{{ drawTool() === 'image' ? ' ou cole uma imagem' : '' }} <button type="button" class="icon-button" aria-label="Sair do modo desenho" (click)="drawToolChange.emit('')"><app-icon name="x" /></button></div> }
-    @if (textEditor(); as editor) {
-      <form class="draw-text-editor" [style.left.px]="editor.left" [style.top.px]="editor.top" (submit)="commitTextDraw($event)" (pointerdown)="$event.stopPropagation()">
-        <input autofocus [value]="editor.text" aria-label="Texto da anotação" placeholder="Digite o texto" (input)="updateTextDraft($event)" (keydown.escape)="textEditor.set(null)" />
-        <button type="submit" class="button primary">Inserir</button>
-      </form>
-    }
     <div class="graph-controls" aria-label="Controles do mapa">
       <button class="icon-button" (click)="zoom()?.zoomOut()" aria-label="Diminuir zoom">
         <app-icon name="minus" /></button
@@ -150,27 +126,20 @@ export class GraphCanvas {
   readonly editable = input(false);
   readonly selected = input('');
   readonly selectedIds = input<string[]>([]);
-  readonly drawTool = input<'' | 'freehand' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon' | 'image'>('');
-  readonly drawToolChange = output<''>();
   readonly graphChange = output<Graph>();
   readonly selectedChange = output<string>();
   readonly edgeRemoved = output<string>();
   readonly selectedEdgeChange = output<string>();
   readonly selectionChange = output<string[]>();
   readonly contextMenu = output<{ x: number; y: number }>();
-  readonly drawingState = signal<{ from: { x: number; y: number }; to: { x: number; y: number }; points: { x: number; y: number }[] } | null>(null);
-  readonly drawPreview = this.drawingState.asReadonly();
-  readonly textEditor = signal<{ point: { x: number; y: number }; left: number; top: number; text: string } | null>(null);
   readonly Math = Math;
   readonly canvas = viewChild(FCanvasComponent);
   readonly zoom = viewChild(FZoomDirective);
-  readonly imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   private fitted = false;
   private resizeState:
     | { id: string; startX: number; startY: number; width: number; height: number }
     | undefined;
   readonly resizeDraft = signal<Record<string, { width: number; height: number }>>({});
-  readonly lastPoint = signal({ x: 900, y: 550 });
   initialFit() {
     if (!this.fitted && this.graph().nodes.length) {
       this.fit();
@@ -300,92 +269,5 @@ export class GraphCanvas {
     event.preventDefault();
     event.stopPropagation();
     this.edgeRemoved.emit(id);
-  }
-  private drawPoint(event: PointerEvent) {
-    const svg = event.currentTarget as SVGSVGElement;
-    const point = svg.createSVGPoint();
-    point.x = event.clientX;
-    point.y = event.clientY;
-    const matrix = svg.getScreenCTM();
-    if (matrix) {
-      const mapped = point.matrixTransform(matrix.inverse());
-      return { x: Math.max(0, Math.min(1800, mapped.x)), y: Math.max(0, Math.min(1100, mapped.y)) };
-    }
-    const rect = svg.getBoundingClientRect();
-    return { x: ((event.clientX - rect.left) / rect.width) * 1800, y: ((event.clientY - rect.top) / rect.height) * 1100 };
-  }
-  pointsAttribute(points: { x: number; y: number }[]) { return points.map((point) => `${point.x},${point.y}`).join(' '); }
-  drawToolLabel() { return ({ freehand: 'Desenho livre', line: 'Reta', arrow: 'Seta', rectangle: 'Quadrado', circle: 'Círculo', text: 'Texto', icon: 'Ícone', image: 'Imagem' } as Record<string, string>)[this.drawTool()] || ''; }
-  beginDraw(event: PointerEvent) {
-    if (!this.drawTool()) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const point = this.drawPoint(event);
-    this.lastPoint.set(point);
-    if (this.drawTool() === 'image') { this.imageInput()?.nativeElement.click(); return; }
-    if (this.drawTool() === 'text') {
-      const surface = (event.currentTarget as SVGSVGElement).getBoundingClientRect();
-      this.textEditor.set({ point, left: event.clientX - surface.left, top: event.clientY - surface.top, text: '' });
-      return;
-    }
-    if (this.drawTool() === 'icon') { this.finishPointDraw(point, point); return; }
-    (event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId);
-    this.drawingState.set({ from: point, to: point, points: [point] });
-  }
-  moveDraw(event: PointerEvent) {
-    const state = this.drawingState();
-    if (!state) return;
-    event.preventDefault();
-    const point = this.drawPoint(event);
-    this.lastPoint.set(point);
-    this.drawingState.set({ ...state, to: point, points: [...state.points, point] });
-  }
-  endDraw(event: PointerEvent) {
-    const state = this.drawingState();
-    if (!state) return;
-    event.preventDefault();
-    this.finishPointDraw(state.from, this.drawPoint(event), state.points);
-    (event.currentTarget as SVGSVGElement).releasePointerCapture?.(event.pointerId);
-  }
-  cancelDraw(event: PointerEvent) { this.drawingState.set(null); (event.currentTarget as SVGSVGElement).releasePointerCapture?.(event.pointerId); }
-  updateTextDraft(event: Event) { this.textEditor.update((draft) => draft ? { ...draft, text: (event.target as HTMLInputElement).value } : draft); }
-  pasteDrawing(event: ClipboardEvent) {
-    if (!this.editable() || this.drawTool() !== 'image') return;
-    const file = Array.from(event.clipboardData?.items || []).map((item) => item.getAsFile()).find((item): item is File => !!item && item.type.startsWith('image/'));
-    if (!file) return;
-    event.preventDefault();
-    this.readImage(file);
-  }
-  importImage(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) this.readImage(file);
-    (event.target as HTMLInputElement).value = '';
-  }
-  private readImage(file: File) {
-    if (file.size > 3_000_000) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result !== 'string') return;
-      const position = this.lastPoint();
-      this.graphChange.emit({ ...this.graph(), drawings: [...(this.graph().drawings || []), { id: crypto.randomUUID(), kind: 'image', color: '#7c3aed', opacity: 1, position, src: reader.result, width: 320, height: 220 }] });
-    };
-    reader.readAsDataURL(file);
-  }
-  commitTextDraw(event: SubmitEvent) {
-    event.preventDefault();
-    const draft = this.textEditor();
-    if (!draft?.text.trim()) return;
-    this.graphChange.emit({ ...this.graph(), drawings: [...(this.graph().drawings || []), { id: crypto.randomUUID(), kind: 'text', color: '#7c3aed', opacity: 1, position: draft.point, text: draft.text.trim(), fontSize: 16 }] });
-    this.textEditor.set(null);
-  }
-  private finishPointDraw(from: { x: number; y: number }, to: { x: number; y: number }, points = [from, to]) {
-    const tool = this.drawTool();
-    if (!tool || tool === 'text') return;
-    const base = { id: crypto.randomUUID(), color: '#7c3aed', opacity: 1 };
-    let item: DrawItem;
-    if (tool === 'icon') item = { ...base, kind: 'icon', position: to, icon: 'sparkles' };
-    else item = { ...base, kind: tool, from, to, points, strokeWidth: 2 } as DrawItem;
-    this.graphChange.emit({ ...this.graph(), drawings: [...(this.graph().drawings || []), item] });
-    this.drawingState.set(null);
   }
 }
