@@ -1,0 +1,942 @@
+Quero que você continue o desenvolvimento deste projeto com base no contexto abaixo.
+
+# 1. Contexto do projeto
+
+O projeto é uma plataforma para criação de roadmaps de estudo, onde o usuário poderá criar seu próprio roadmap com temas completamente variados, seguindo diferentes padrões e formatos de roadmaps, fluxogramas e trilhas de conhecimento, de forma dinâmica, visual, intuitiva e fácil de usar.
+
+A proposta central da plataforma é permitir que o usuário estruture, compartilhe e acompanhe caminhos de aprendizado, tanto para uso pessoal quanto para colaboração com outras pessoas.
+
+O sistema deve funcionar como uma mistura de:
+
+- editor visual de roadmap;
+- plataforma de estudos;
+- comunidade de compartilhamento de conhecimento;
+- vitrine de roadmaps públicos;
+- ambiente colaborativo de evolução e troca de experiência.
+
+# 2. Objetivo principal da plataforma
+
+A plataforma deve permitir que usuários:
+
+- criem roadmaps personalizados;
+- organizem trilhas de estudo;
+- personalizem a aparência e estrutura desses roadmaps;
+- acompanhem o progresso de conclusão;
+- compartilhem seus roadmaps com outras pessoas;
+- publiquem roadmaps para a comunidade;
+- descubram conteúdos e trilhas criadas por outros usuários;
+- interajam com a comunidade em torno de aprendizado, estudo e evolução.
+
+A ideia principal é que o sistema seja uma comunidade de estudos, onde pessoas compartilham:
+
+- conhecimento;
+- técnicas de estudo;
+- experiências;
+- recomendações;
+- trilhas prontas;
+- sequências de aprendizagem;
+- materiais e links úteis.
+
+# 3. Filosofia do projeto
+
+A filosofia central da plataforma é:
+
+"Compartilhar conhecimento, técnicas de estudo e trilhas de aprendizado, permitindo que pessoas com mais experiência possam mostrar o caminho para outras, ajudando-as a aprender de forma mais clara, organizada e eficiente."
+
+A plataforma deve transmitir os seguintes valores:
+
+- clareza;
+- comunidade;
+- evolução;
+- colaboração;
+- criatividade;
+- acessibilidade;
+- organização;
+- progressão;
+- conexão entre conteúdos;
+- facilidade de uso.
+
+Ela deve incentivar que o usuário:
+
+- aprenda melhor;
+- ensine melhor;
+- compartilhe o que sabe;
+- siga trilhas já estruturadas;
+- crie novas trilhas;
+- descubra novos caminhos de estudo.
+
+# 4. Funcionalidades principais esperadas
+
+## 4.1. Criação e edição de roadmaps
+
+A plataforma deverá permitir:
+
+- criar roadmaps do zero;
+- montar fluxos visualmente;
+- clicar e arrastar os nodes;
+- mover nodes livremente;
+- conectar nodes entre si;
+- criar árvores que se dividem em múltiplos caminhos;
+- criar ramificações;
+- editar títulos dos nodes;
+- editar descrições;
+- adicionar conteúdos;
+- reorganizar a estrutura livremente;
+- excluir nodes;
+- duplicar nodes;
+- criar diferentes tipos de nodes;
+- criar diferentes tipos de conexão.
+
+O editor deve ser extremamente visual e trabalhar prioritariamente com interações de clicar, arrastar e soltar.
+
+## 4.2. Personalização visual
+
+O usuário deverá poder:
+
+- personalizar cores;
+- personalizar formato dos nodes;
+- escolher estilos diferentes para nodes;
+- personalizar conexões;
+- diferenciar visualmente tipos diferentes de conteúdo;
+- criar roadmaps com identidade própria.
+
+Apesar dessa personalização, a interface da plataforma em si deve sempre permanecer coerente com o design system da BreadCrumbs.
+
+## 4.3. Conteúdo dos nodes
+
+Os nodes poderão representar diferentes tipos de conteúdo.
+
+Por exemplo:
+
+- módulo;
+- etapa;
+- tarefa;
+- recurso;
+- marco;
+- conteúdo;
+- objetivo;
+- projeto;
+- checkpoint.
+
+Um node poderá possuir informações como:
+
+- título;
+- descrição;
+- links externos;
+- materiais de estudo;
+- referências;
+- observações;
+- progresso;
+- estado de conclusão;
+- obrigatoriedade;
+- posição no roadmap.
+
+A estrutura deve ser preparada para permitir novos tipos de nodes futuramente.
+
+## 4.4. Links e materiais
+
+O usuário poderá adicionar aos nodes:
+
+- links de artigos;
+- vídeos;
+- documentação;
+- cursos;
+- livros;
+- sites;
+- ferramentas;
+- repositórios;
+- outros materiais úteis.
+
+## 4.5. Progresso
+
+O sistema deverá permitir acompanhamento do progresso.
+
+Por exemplo:
+
+- node não iniciado;
+- node em andamento;
+- node concluído;
+- roadmap com percentual geral de conclusão;
+- quantidade de etapas concluídas;
+- quantidade de etapas restantes.
+
+O progresso deve ser apresentado visualmente de forma clara.
+
+# 5. Compartilhamento e permissões
+
+O usuário poderá compartilhar um roadmap com outras pessoas.
+
+O compartilhamento deverá possuir níveis de permissão.
+
+Por exemplo:
+
+- Proprietário
+- Editor
+- Comentador
+- Visualizador
+
+O proprietário controla o roadmap.
+
+Um editor poderá colaborar na construção.
+
+Um comentador poderá participar de discussões sem alterar a estrutura.
+
+Um visualizador poderá apenas consumir o conteúdo.
+
+A arquitetura deve ser preparada para um sistema robusto de permissões.
+
+# 6. Roadmaps públicos
+
+O usuário poderá decidir tornar um roadmap público.
+
+Quando isso acontecer, o roadmap poderá aparecer na área de exploração da plataforma.
+
+Esses roadmaps devem funcionar como referência para outros usuários.
+
+Um usuário poderá encontrar um roadmap como:
+
+"Backend Developer"
+
+"DBA Oracle"
+
+"Aprender Matemática do Zero"
+
+"Fotografia"
+
+"Concurso Público"
+
+"Japonês"
+
+"Inteligência Artificial"
+
+"Design"
+
+"Finanças Pessoais"
+
+etc.
+
+A plataforma NÃO deve ser limitada a tecnologia.
+
+Ela deve permitir roadmaps sobre praticamente qualquer assunto.
+
+# 7. Comunidade
+
+Um dos pontos centrais do projeto será a comunidade.
+
+A plataforma deve permitir mecanismos de interação entre usuários.
+
+Considere mecanismos como:
+
+- perfis públicos;
+- seguir usuários;
+- seguir roadmaps;
+- curtidas;
+- favoritos;
+- comentários;
+- discussões;
+- compartilhamento;
+- quantidade de seguidores;
+- quantidade de usuários utilizando determinado roadmap;
+- atividade recente;
+- criadores em destaque;
+- roadmaps populares;
+- roadmaps em alta;
+- novidades;
+- categorias;
+- tags.
+
+Não precisa necessariamente implementar todos esses mecanismos imediatamente.
+
+Primeiro analise quais fazem mais sentido arquiteturalmente.
+
+O objetivo é construir uma comunidade baseada em compartilhamento de conhecimento.
+
+# 8. Área Explorar
+
+Quero uma área chamada "Explorar".
+
+Essa área será uma das principais telas da plataforma.
+
+Ela será responsável por apresentar:
+
+- roadmaps públicos;
+- roadmaps em alta;
+- novidades;
+- roadmaps recentemente publicados;
+- roadmaps populares;
+- categorias;
+- temas;
+- autores;
+- recomendações.
+
+A interface deve permitir descoberta rápida de conteúdo.
+
+Essa é a área onde a comunidade deve "brilhar".
+
+Ela precisa ser:
+
+- visual;
+- dinâmica;
+- responsiva;
+- simples;
+- organizada;
+- moderna;
+- agradável de navegar;
+- rápida de entender.
+
+O usuário deve conseguir entrar na plataforma e rapidamente encontrar algo interessante para estudar.
+
+# 9. Busca e descoberta
+
+A plataforma deve possuir uma busca que permita encontrar:
+
+- roadmaps;
+- temas;
+- categorias;
+- usuários;
+- conteúdos.
+
+Prepare a arquitetura para mecanismos futuros de:
+
+- filtros;
+- ordenação;
+- relevância;
+- popularidade;
+- novidades;
+- categorias;
+- tags.
+
+# 10. Cadastro do usuário
+
+O usuário deverá poder criar uma conta.
+
+O fluxo esperado é:
+
+1. usuário realiza cadastro;
+2. sistema envia um e-mail de confirmação;
+3. usuário confirma o e-mail;
+4. conta é validada;
+5. usuário pode acessar a plataforma.
+
+A arquitetura deve ser preparada para confirmação segura de e-mail.
+
+# 11. Primeiro login e onboarding
+
+Durante o primeiro login, o usuário deverá passar por um tour guiado pela plataforma.
+
+Podemos utilizar algo semelhante ao Driver.js:
+
+https://driverjs.com/
+
+O tour deverá explicar:
+
+- menu principal;
+- área Explorar;
+- área Meus Roadmaps;
+- editor de roadmap;
+- funcionamento dos nodes;
+- como conectar nodes;
+- como acompanhar progresso;
+- como compartilhar roadmaps;
+- funcionamento da comunidade;
+- como publicar um roadmap.
+
+Esse onboarding é uma parte importante da experiência.
+
+O usuário deve terminar o tour entendendo rapidamente o conceito da plataforma.
+
+O sistema também deve registrar que o usuário concluiu o onboarding para não exibi-lo novamente automaticamente.
+
+# 12. Experiência do editor
+
+O Editor de Roadmap será uma das funcionalidades mais importantes da plataforma.
+
+Ele deve ter uma experiência semelhante a ferramentas visuais modernas.
+
+A interface deve permitir:
+
+- zoom;
+- movimentação no canvas;
+- clicar e arrastar;
+- criar nodes;
+- mover nodes;
+- editar nodes;
+- conectar nodes;
+- criar ramificações;
+- criar caminhos;
+- remover conexões;
+- reorganizar elementos.
+
+A ideia é que o usuário consiga montar um roadmap quase completamente através de interação visual.
+
+O editor deverá futuramente suportar estruturas complexas.
+
+Portanto, pense desde o início em uma arquitetura que não fique limitada a roadmaps lineares.
+
+# 13. Tipos de estrutura
+
+Os roadmaps poderão assumir formatos variados.
+
+Exemplos:
+
+Roadmap linear:
+
+A → B → C → D
+
+Roadmap com ramificações:
+
+        B
+       /
+A → C
+       \
+        D
+
+Estruturas maiores:
+
+        B → D
+       /
+A → C → E → G
+       \
+        F
+
+Também poderão existir estruturas independentes ou conexões opcionais.
+
+Não modele o sistema supondo que todo roadmap será simplesmente uma lista ordenada.
+
+Pense no roadmap como um grafo de nodes e conexões.
+
+# 14. Identidade da marca
+
+O nome da plataforma é:
+
+BreadCrumbs
+
+Tagline:
+
+"Crie, compartilhe e siga trilhas de conhecimento"
+
+As imagens enviadas nesta conversa representam o guia visual principal da plataforma.
+
+Use essas imagens como referência de design system.
+
+# 15. Paleta de cores
+
+A identidade visual utiliza aproximadamente:
+
+Azul Profundo:
+#0F2D5B
+
+Azul Principal:
+#2563EB
+
+Ciano:
+#14B8A6
+
+Coral:
+#F472B6
+
+Cinza Claro:
+#F4F6F8
+
+Essas cores devem formar a base da interface.
+
+Use cores de apoio somente quando necessário e sempre mantendo consistência com esse sistema visual.
+
+# 16. Características visuais da marca
+
+A identidade visual deve transmitir:
+
+- confiança;
+- foco;
+- profundidade;
+- aprendizado;
+- evolução;
+- tecnologia;
+- conexão;
+- clareza;
+- fluxo;
+- criatividade;
+- energia;
+- colaboração.
+
+# 17. Estilo visual
+
+O estilo da plataforma deve seguir os seguintes princípios:
+
+## Minimalista
+
+Interface essencial, limpa e sem ruído excessivo.
+
+## Sofisticada
+
+Visual moderno, profissional e atemporal.
+
+## Colaborativa
+
+A interface deve transmitir a ideia de pessoas construindo e compartilhando conhecimento.
+
+## Modular
+
+Os elementos devem funcionar como blocos reutilizáveis.
+
+## Intuitiva
+
+As ações devem ser fáceis de entender sem necessidade de longas explicações.
+
+# 18. Sistema visual
+
+As imagens enviadas devem servir como referência para:
+
+- botões;
+- cards;
+- inputs;
+- formulários;
+- menus;
+- sidebar;
+- modais;
+- dropdowns;
+- tags;
+- chips;
+- avatares;
+- indicadores de progresso;
+- nodes;
+- conexões;
+- painéis;
+- tooltips;
+- estados de hover;
+- estados de seleção;
+- estados desabilitados;
+- estados de erro;
+- estados de sucesso.
+
+Caso algum componente necessário não apareça explicitamente nas imagens:
+
+1. analise os componentes existentes;
+2. identifique os padrões visuais;
+3. crie o novo componente seguindo esses padrões.
+
+Não crie componentes que pareçam pertencer a outro sistema visual.
+
+# 19. Regra importante sobre o design
+
+As imagens NÃO são apenas inspiração.
+
+Elas são o guia visual oficial inicial do projeto.
+
+Portanto:
+
+- mantenha a mesma linguagem visual;
+- respeite espaçamentos;
+- respeite hierarquia;
+- respeite arredondamentos;
+- respeite proporções;
+- mantenha consistência nas cores;
+- preserve o uso predominante de fundos claros;
+- priorize o Azul Principal;
+- utilize Coral principalmente como destaque;
+- mantenha bastante respiro visual;
+- use linhas arredondadas e modulares;
+- mantenha os componentes visualmente consistentes.
+
+Ao criar elementos novos, faça com que eles pareçam naturalmente pertencentes ao BreadCrumbs.
+
+# 20. Tema inicial
+
+Nesta primeira versão da plataforma, trabalhe prioritariamente com tema claro.
+
+Não crie dark mode agora, a menos que exista alguma necessidade técnica estrutural para deixar o suporte preparado.
+
+# 21. Stack
+
+O projeto será construído utilizando:
+
+INFRAESTRUTURA
+
+- Docker
+- Docker Compose
+- Nginx
+
+BACKEND
+
+- Node.js
+- TypeScript
+- NestJS
+- REST API
+- Swagger / OpenAPI
+
+FRONTEND
+
+- Angular
+- TypeScript
+
+# 22. Estrutura principal
+
+O projeto deverá possuir:
+
+/
+├── API/
+├── ANGULAR/
+├── nginx/
+├── docs/
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+└── README.md
+
+A pasta:
+
+API/
+
+será responsável pelo backend.
+
+A pasta:
+
+ANGULAR/
+
+será responsável pelo frontend.
+
+# 23. Arquitetura do backend
+
+O backend será feito com NestJS.
+
+Quero uma arquitetura organizada, robusta e preparada para crescimento.
+
+As regras de negócio devem ficar principalmente nos Services.
+
+Controllers devem ser enxutos.
+
+Fluxo conceitual:
+
+Controller
+    ↓
+Service
+    ↓
+Repository
+    ↓
+Persistência
+
+Organize os recursos por domínio.
+
+Exemplo conceitual:
+
+src/
+├── modules/
+│   ├── users/
+│   ├── authentication/
+│   ├── roadmaps/
+│   ├── community/
+│   └── ...
+├── common/
+├── config/
+├── infrastructure/
+└── main.ts
+
+Não é obrigatório seguir exatamente essa estrutura se houver uma alternativa melhor dentro das convenções do NestJS.
+
+Se escolher outra abordagem, documente a decisão.
+
+# 24. API REST
+
+A API deverá seguir boas práticas REST.
+
+Prepare padrões para:
+
+- versionamento;
+- DTOs;
+- validação;
+- serialização;
+- tratamento global de erros;
+- responses consistentes;
+- status HTTP;
+- guards;
+- interceptors;
+- pipes;
+- configuração;
+- variáveis de ambiente.
+
+Utilize versionamento semelhante a:
+
+/api/v1/
+
+# 25. Swagger / OpenAPI
+
+Configure Swagger.
+
+Quero poder acessar documentação semelhante a:
+
+/api/docs
+
+A documentação deverá evoluir junto com a API.
+
+Ela deverá futuramente documentar:
+
+- parâmetros;
+- DTOs;
+- autenticação;
+- responses;
+- erros;
+- exemplos;
+- schemas.
+
+# 26. Postman
+
+Quero manter uma collection do Postman para desenvolvimento e teste da API.
+
+Crie uma estratégia para manter a collection sincronizada ou facilmente atualizável a partir do OpenAPI.
+
+Estrutura sugerida:
+
+docs/
+├── openapi/
+├── postman/
+└── architecture/
+
+# 27. Arquitetura do Angular
+
+O frontend deverá seguir convenções modernas do Angular.
+
+Organize por responsabilidade e feature.
+
+Exemplo:
+
+src/app/
+├── core/
+├── shared/
+├── features/
+├── layouts/
+├── services/
+├── models/
+├── guards/
+└── interceptors/
+
+Utilize corretamente:
+
+- standalone components;
+- lazy loading;
+- routing;
+- services;
+- guards;
+- interceptors;
+- componentização;
+- signals quando fizer sentido;
+- organização por feature.
+
+Evite componentes gigantes.
+
+Evite lógica complexa diretamente em templates.
+
+# 28. Editor visual
+
+Como o editor será uma parte central da aplicação, analise bibliotecas modernas que possam auxiliar na criação de:
+
+- grafos;
+- nodes;
+- edges;
+- drag and drop;
+- zoom;
+- pan;
+- seleção;
+- edição visual.
+
+Não escolha uma biblioteca automaticamente.
+
+Compare as alternativas considerando:
+
+- compatibilidade com Angular;
+- manutenção;
+- licença;
+- extensibilidade;
+- performance;
+- facilidade de personalização;
+- capacidade de representar grafos complexos.
+
+Documente a decisão antes de incorporar uma biblioteca importante.
+
+# 29. Responsividade
+
+Toda a aplicação deve ser responsiva.
+
+Priorize desktop para o editor visual, já que manipulação de grafos naturalmente exige mais espaço.
+
+Mesmo assim, outras áreas como:
+
+- Explorar;
+- perfil;
+- roadmap público;
+- comunidade;
+- notificações;
+
+devem funcionar adequadamente em:
+
+- desktop;
+- tablet;
+- celular.
+
+# 30. Acessibilidade
+
+Considere desde o início:
+
+- navegação por teclado;
+- contraste;
+- foco visível;
+- labels;
+- ARIA quando necessário;
+- semântica HTML;
+- estados visuais além de apenas cores.
+
+# 31. Skills
+
+Use a skill `find-skills` para encontrar skills que possam auxiliar no desenvolvimento.
+
+Procure especialmente skills relacionadas a:
+
+- NestJS;
+- Angular;
+- Docker;
+- Nginx;
+- arquitetura;
+- design systems;
+- UI/UX;
+- acessibilidade;
+- testes;
+- segurança;
+- documentação;
+- REST APIs;
+- OpenAPI;
+- autenticação;
+- bancos de dados;
+- grafos;
+- drag and drop;
+- performance.
+
+Não instale skills indiscriminadamente.
+
+Primeiro analise o que elas fazem e utilize somente as que realmente agregarem ao projeto.
+
+# 32. Forma de trabalho
+
+Antes de implementar uma funcionalidade relevante:
+
+1. entenda o requisito;
+2. analise a arquitetura existente;
+3. verifique se existe alguma skill útil;
+4. escolha uma abordagem adequada;
+5. mantenha consistência com o restante do projeto;
+6. implemente;
+7. valide;
+8. documente decisões importantes.
+
+Evite soluções improvisadas.
+
+Evite adicionar dependências sem necessidade.
+
+Evite overengineering.
+
+Ao mesmo tempo, não transforme o projeto em uma arquitetura simplista de tutorial.
+
+O objetivo é encontrar equilíbrio entre:
+
+simplicidade
++
+boas práticas
++
+manutenibilidade
++
+arquitetura profissional
++
+possibilidade de evolução
+
+# 33. Contexto de portfólio
+
+Esse projeto será utilizado no meu portfólio como desenvolvedor.
+
+Portanto, quero que ele demonstre conhecimento em:
+
+- arquitetura de software;
+- backend;
+- frontend;
+- APIs;
+- segurança;
+- autenticação;
+- modelagem;
+- bancos de dados;
+- Docker;
+- Nginx;
+- documentação;
+- testes;
+- UI/UX;
+- acessibilidade;
+- Git;
+- qualidade de código;
+- manutenção;
+- escalabilidade.
+
+O código deve parecer um projeto real, não apenas uma demonstração acadêmica.
+
+# 34. NÃO faça tudo de uma vez
+
+Apesar de eu estar fornecendo o conceito completo da aplicação, NÃO quero que você implemente todo o projeto imediatamente.
+
+Utilize este documento como contexto global.
+
+O desenvolvimento deverá acontecer em etapas.
+
+Não saia criando dezenas de módulos, entidades e funcionalidades apenas porque estão descritos aqui.
+
+Implemente apenas aquilo que for solicitado em cada etapa.
+
+# 35. Etapa atual
+
+Neste momento, use todas essas informações para:
+
+- compreender o produto;
+- compreender a filosofia;
+- compreender a experiência esperada;
+- compreender o design system;
+- compreender as futuras necessidades arquiteturais.
+
+Se a configuração inicial do ambiente ainda não estiver concluída, finalize somente:
+
+- Docker;
+- Docker Compose;
+- Nginx;
+- NestJS;
+- Angular;
+- estrutura de diretórios;
+- Swagger;
+- documentação inicial;
+- padrões arquiteturais básicos.
+
+NÃO implemente ainda:
+
+- cadastro;
+- autenticação;
+- confirmação de e-mail;
+- comunidade;
+- editor;
+- roadmaps;
+- comentários;
+- seguidores;
+- progresso;
+- onboarding;
+- busca;
+- funcionalidades de negócio.
+
+Essas funcionalidades serão desenvolvidas gradualmente nas próximas etapas.
+
+# 36. Regra final
+
+A partir de agora, considere este documento como o contexto geral oficial do projeto BreadCrumbs.
+
+Todas as decisões futuras deverão respeitar:
+
+- a filosofia da plataforma;
+- o conceito de comunidade;
+- a experiência visual;
+- o design system das imagens fornecidas;
+- a arquitetura definida;
+- a evolução incremental do projeto.
+
+Quando uma informação ainda não estiver definida, não invente silenciosamente um requisito importante.
+
+Faça uma escolha técnica apenas quando ela puder ser inferida com segurança ou documente claramente a decisão tomada.
