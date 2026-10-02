@@ -1,0 +1,30 @@
+<main>
+  <h1>Ambiente preparado</h1>
+  <p>Estrutura inicial do projeto. As funcionalidades serão definidas na próxima etapa.</p>
+
+  <section aria-labelledby="connection-heading">
+    <h2 id="connection-heading">Conexão com a API</h2>
+    <p>Verifique se o frontend consegue acessar o endpoint técnico de disponibilidade.</p>
+    <button type="button" (click)="checkApi()" [disabled]="status() === 'checking'">
+      {{ status() === 'checking' ? 'Verificando…' : 'Verificar API' }}
+    </button>
+    <p role="status" aria-live="polite">
+      @switch (status()) {
+        @case ('idle') {
+          A conexão ainda não foi verificada.
+        }
+        @case ('checking') {
+          Consultando a API…
+        }
+        @case ('ready') {
+          API disponível.
+        }
+        @case ('unavailable') {
+          Não foi possível confirmar a disponibilidade da API. Verifique o backend e o proxy e tente
+          novamente.
+        }
+      }
+    </p>
+    <a href="/api/docs">Abrir documentação da API</a>
+  </section>
+</main>
