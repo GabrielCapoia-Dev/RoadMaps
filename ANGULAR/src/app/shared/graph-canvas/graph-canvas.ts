@@ -119,6 +119,12 @@ import { Icon } from '../icon/icon';
           }
           <defs><marker id="draw-arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="context-stroke" /></marker></defs>
     </svg>
+    @if (textEditor(); as editor) {
+      <form class="draw-text-editor" [style.left.px]="editor.left" [style.top.px]="editor.top" (submit)="commitTextDraw($event)" (pointerdown)="$event.stopPropagation()">
+        <input autofocus [value]="editor.text" aria-label="Texto da anotação" placeholder="Digite o texto" (input)="updateTextDraft($event)" (keydown.escape)="textEditor.set(null)" />
+        <button type="submit" class="button primary">Inserir</button>
+      </form>
+    }
     <div class="graph-controls" aria-label="Controles do mapa">
       <button class="icon-button" (click)="zoom()?.zoomOut()" aria-label="Diminuir zoom">
         <app-icon name="minus" /></button
@@ -150,6 +156,7 @@ export class GraphCanvas {
   readonly contextMenu = output<{ x: number; y: number }>();
   readonly drawingState = signal<{ from: { x: number; y: number }; to: { x: number; y: number }; points: { x: number; y: number }[] } | null>(null);
   readonly drawPreview = this.drawingState.asReadonly();
+  readonly textEditor = signal<{ point: { x: number; y: number }; left: number; top: number; text: string } | null>(null);
   readonly Math = Math;
   readonly canvas = viewChild(FCanvasComponent);
   readonly zoom = viewChild(FZoomDirective);
@@ -307,7 +314,12 @@ export class GraphCanvas {
     event.preventDefault();
     event.stopPropagation();
     const point = this.drawPoint(event);
-    if (this.drawTool() === 'text' || this.drawTool() === 'icon') { this.finishPointDraw(point, point); return; }
+    if (this.drawTool() === 'text') {
+      const surface = (event.currentTarget as SVGSVGElement).getBoundingClientRect();
+      this.textEditor.set({ point, left: event.clientX - surface.left, top: event.clientY - surface.top, text: '' });
+      return;
+    }
+    if (this.drawTool() === 'icon') { this.finishPointDraw(point, point); return; }
     (event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId);
     this.drawingState.set({ from: point, to: point, points: [point] });
   }
@@ -326,15 +338,21 @@ export class GraphCanvas {
     (event.currentTarget as SVGSVGElement).releasePointerCapture?.(event.pointerId);
   }
   cancelDraw(event: PointerEvent) { this.drawingState.set(null); (event.currentTarget as SVGSVGElement).releasePointerCapture?.(event.pointerId); }
+  updateTextDraft(event: Event) { this.textEditor.update((draft) => draft ? { ...draft, text: (event.target as HTMLInputElement).value } : draft); }
+  commitTextDraw(event: SubmitEvent) {
+    event.preventDefault();
+    const draft = this.textEditor();
+    if (!draft?.text.trim()) return;
+    this.graphChange.emit({ ...this.graph(), drawings: [...(this.graph().drawings || []), { id: crypto.randomUUID(), kind: 'text', color: '#7c3aed', opacity: 1, position: draft.point, text: draft.text.trim(), fontSize: 16 }] });
+    this.textEditor.set(null);
+  }
   private finishPointDraw(from: { x: number; y: number }, to: { x: number; y: number }, points = [from, to]) {
     const tool = this.drawTool();
-    if (!tool) return;
+    if (!tool || tool === 'text') return;
     const base = { id: crypto.randomUUID(), color: '#7c3aed', opacity: 1 };
     let item: DrawItem;
-    if (tool === 'text') item = { ...base, kind: 'text', position: to, text: window.prompt('Texto da anotação') || '', fontSize: 16 };
-    else if (tool === 'icon') item = { ...base, kind: 'icon', position: to, icon: 'sparkles' };
+    if (tool === 'icon') item = { ...base, kind: 'icon', position: to, icon: 'sparkles' };
     else item = { ...base, kind: tool, from, to, points, strokeWidth: 2 } as DrawItem;
-    if (item.kind === 'text' && !item.text) { this.drawingState.set(null); return; }
     this.graphChange.emit({ ...this.graph(), drawings: [...(this.graph().drawings || []), item] });
     this.drawingState.set(null);
   }
