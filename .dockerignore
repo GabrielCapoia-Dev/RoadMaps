@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/coverage
+**/.angular
+.git
+.local
+**/.env
+**/.env.*
+!**/.env.example
+API
+ANGULAR
+docs

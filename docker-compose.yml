@@ -1,0 +1,144 @@
+name: roadmaps
+
+services:
+  postgres:
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    environment:
+      POSTGRES_USER: breadcrumbs
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-breadcrumbs_local}
+      POSTGRES_DB: breadcrumbs
+    ports:
+      - '127.0.0.1:${DATABASE_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U breadcrumbs -d breadcrumbs']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [application]
+
+  mailpit:
+    image: axllent/mailpit@sha256:ed9b00c609e77e99c79b93f1178255ebc271868920f2c69a8d166bd5634ed10d
+    ports:
+      - '127.0.0.1:8025:8025'
+      - '127.0.0.1:1025:1025'
+    networks: [application]
+
+  api:
+    build:
+      context: ./API
+      target: development
+    init: true
+    environment:
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 3000
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+      TSC_WATCHFILE: DynamicPriorityPolling
+      TRUST_PROXY: 'true'
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://breadcrumbs:${POSTGRES_PASSWORD:-breadcrumbs_local}@postgres:5432/breadcrumbs}
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_SECURE: 'false'
+      MAIL_FROM: BreadCrumbs <no-reply@breadcrumbs.local>
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    volumes:
+      - ./API/src:/workspace/API/src
+      - ./API/test:/workspace/API/test
+      - ./API/scripts:/workspace/API/scripts
+      - ./API/migrations:/workspace/API/migrations
+      - ./docs:/workspace/docs
+    expose:
+      - '3000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/v1/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - application
+
+  angular:
+    build:
+      context: ./ANGULAR
+      target: development
+    init: true
+    volumes:
+      - ./ANGULAR/src:/workspace/ANGULAR/src
+      - ./ANGULAR/public:/workspace/ANGULAR/public
+    expose:
+      - '4200'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:4200/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - application
+
+  nginx:
+    build:
+      context: ./nginx
+      args:
+        FRONTEND_PORT: 4200
+    ports:
+      - '${HTTP_BIND_ADDRESS:-127.0.0.1}:${HTTP_PORT:-8080}:8080'
+    depends_on:
+      api:
+        condition: service_healthy
+      angular:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8080/healthz']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - application
+
+  # Optional one-shot documentation tooling; does not start with compose up.
+  tooling:
+    profiles: ['tools']
+    build:
+      context: .
+      dockerfile: Dockerfile.tooling
+    volumes:
+      - ./docs:/workspace/docs
+    networks:
+      - application
+
+networks:
+  application:
+
+volumes:
+  postgres_data:
