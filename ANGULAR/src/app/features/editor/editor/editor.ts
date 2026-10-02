@@ -91,7 +91,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
               <app-icon name="redo" /></button
             ><span class="soft-badge"
               >{{ graph().nodes.length }} etapas · {{ graph().edges.length }} conexões</span
-            ><button class="icon-button" aria-label="Organizar mapa automaticamente" (click)="autoArrange()"><app-icon name="rotate" /></button><button class="icon-button" aria-label="Ajustar mapa à tela" (click)="fitMap()"><app-icon name="fit" /></button><span class="draw-tools" aria-label="Ferramentas de anotação">@for (tool of drawTools; track tool.value) { <button type="button" class="icon-button" [class.active]="drawTool() === tool.value" [attr.aria-label]="tool.label" (click)="drawTool.set(drawTool() === tool.value ? '' : tool.value)"><app-icon [name]="tool.icon" /></button> }</span>
+            ><button class="icon-button" aria-label="Organizar mapa automaticamente" (click)="autoArrange()"><app-icon name="rotate" /></button><button class="icon-button" aria-label="Ajustar mapa à tela" (click)="fitMap()"><app-icon name="fit" /></button><span class="draw-tools" aria-label="Ferramentas de anotação">@for (tool of drawTools; track tool.value) { <button type="button" class="icon-button" [class.active]="drawTool() === tool.value" [attr.aria-label]="tool.label" [title]="tool.label" (click)="drawTool.set(drawTool() === tool.value ? '' : tool.value)"><app-icon [name]="tool.icon" /></button> }</span>
           </div>
           <app-graph-canvas
             [graph]="graph()"
@@ -226,8 +226,8 @@ export class Editor {
   readonly graph = signal<Graph>({ nodes: [], edges: [] });
   readonly selected = signal('');
   readonly selectedIds = signal<string[]>([]);
-  readonly drawTool = signal<'' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon'>('');
-  readonly drawTools = [{ value: 'line' as const, label: 'Desenhar reta', icon: 'minus' }, { value: 'arrow' as const, label: 'Desenhar seta', icon: 'arrow' }, { value: 'rectangle' as const, label: 'Desenhar quadrado', icon: 'square' }, { value: 'circle' as const, label: 'Desenhar círculo', icon: 'circle' }, { value: 'text' as const, label: 'Adicionar comentário', icon: 'edit' }, { value: 'icon' as const, label: 'Adicionar ícone', icon: 'sparkles' }];
+  readonly drawTool = signal<'' | 'freehand' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon'>('');
+  readonly drawTools = [{ value: 'freehand' as const, label: 'Desenhar livremente', icon: 'edit' }, { value: 'line' as const, label: 'Desenhar reta', icon: 'minus' }, { value: 'arrow' as const, label: 'Desenhar seta', icon: 'arrow' }, { value: 'rectangle' as const, label: 'Desenhar quadrado', icon: 'square' }, { value: 'circle' as const, label: 'Desenhar círculo', icon: 'circle' }, { value: 'text' as const, label: 'Adicionar texto solto', icon: 'edit' }, { value: 'icon' as const, label: 'Adicionar ícone', icon: 'sparkles' }];
   readonly contextMenu = signal<{ x: number; y: number } | null>(null);
   readonly infoPanelOpen = signal(false);
   readonly selectedNode = computed(() => this.graph().nodes.find((n) => n.id === this.selected()));

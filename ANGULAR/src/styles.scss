@@ -1405,6 +1405,7 @@ app-tour p {
 }
 .draw-layer { position: absolute; inset: 0; width: 1800px; height: 1100px; pointer-events: none; overflow: visible; z-index: 20; }
 .draw-layer.active { pointer-events: all; cursor: crosshair; }
+.draw-layer.active > * { pointer-events: none; }
 .draw-layer text { user-select: none; }
 .draw-tools { display: inline-flex; gap: 3px; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--border); }
 .draw-tools .icon-button.active { color: var(--blue); background: var(--pale); border-color: var(--blue); }

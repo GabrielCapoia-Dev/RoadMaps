@@ -27,7 +27,7 @@ import { Icon } from '../icon/icon';
             [fTargetId]="edge.target + '-in'"
             [fType]="connectionType(edge)"
             [fReassignDisabled]="true"
-            [attr.data-edge-type]="connectionType(edge)"
+            [attr.data-edge-type]="edgeType(edge)"
             [style.--edge-color]="edge.color || '#7c91b8'"
             [style.--edge-width]="(edge.strokeWidth || 2) + 'px'"
             [style.--edge-opacity]="edge.opacity || 1"
@@ -102,15 +102,19 @@ import { Icon } from '../icon/icon';
           </div>
         }
         <f-connection-for-create />
-        <svg class="draw-layer" [class.active]="!!drawTool()" viewBox="0 0 1800 1100" preserveAspectRatio="none" (pointerdown)="beginDraw($event)" (pointermove)="moveDraw($event)" (pointerup)="endDraw($event)">
+        <svg #drawSurface class="draw-layer" [class.active]="!!drawTool()" viewBox="0 0 1800 1100" preserveAspectRatio="none" (pointerdown)="beginDraw($event)" (pointermove)="moveDraw($event)" (pointerup)="endDraw($event)" (pointercancel)="cancelDraw($event)">
           @for (item of graph().drawings || []; track item.id) {
+            @if (item.kind === 'freehand') { <polyline [attr.points]="pointsAttribute(item.points || [item.from, item.to])" fill="none" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" stroke-linecap="round" stroke-linejoin="round" /> }
             @if (item.kind === 'line' || item.kind === 'arrow') { <line [attr.x1]="item.from.x" [attr.y1]="item.from.y" [attr.x2]="item.to.x" [attr.y2]="item.to.y" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" [attr.marker-end]="item.kind === 'arrow' ? 'url(#draw-arrow)' : null" /> }
             @if (item.kind === 'rectangle') { <rect [attr.x]="Math.min(item.from.x, item.to.x)" [attr.y]="Math.min(item.from.y, item.to.y)" [attr.width]="Math.abs(item.to.x - item.from.x)" [attr.height]="Math.abs(item.to.y - item.from.y)" fill="none" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" /> }
             @if (item.kind === 'circle') { <ellipse [attr.cx]="(item.from.x + item.to.x) / 2" [attr.cy]="(item.from.y + item.to.y) / 2" [attr.rx]="Math.abs(item.to.x - item.from.x) / 2" [attr.ry]="Math.abs(item.to.y - item.from.y) / 2" fill="none" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" /> }
             @if (item.kind === 'text') { <text [attr.x]="item.position.x" [attr.y]="item.position.y" [attr.fill]="item.color" [attr.font-size]="item.fontSize" [attr.opacity]="item.opacity">{{ item.text }}</text> }
             @if (item.kind === 'icon') { <text [attr.x]="item.position.x" [attr.y]="item.position.y" [attr.fill]="item.color" font-size="28" [attr.opacity]="item.opacity">✦</text> }
           }
-          @if (drawPreview(); as preview) { <line [attr.x1]="preview.from.x" [attr.y1]="preview.from.y" [attr.x2]="preview.to.x" [attr.y2]="preview.to.y" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4" /> }
+          @if (drawPreview(); as preview) {
+            @if (drawTool() === 'freehand') { <polyline [attr.points]="pointsAttribute(preview.points)" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4" stroke-linecap="round" /> }
+            @else { <line [attr.x1]="preview.from.x" [attr.y1]="preview.from.y" [attr.x2]="preview.to.x" [attr.y2]="preview.to.y" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4" /> }
+          }
           <defs><marker id="draw-arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="context-stroke" /></marker></defs>
         </svg>
         </f-canvas
@@ -137,14 +141,14 @@ export class GraphCanvas {
   readonly editable = input(false);
   readonly selected = input('');
   readonly selectedIds = input<string[]>([]);
-  readonly drawTool = input<'' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon'>('');
+  readonly drawTool = input<'' | 'freehand' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon'>('');
   readonly graphChange = output<Graph>();
   readonly selectedChange = output<string>();
   readonly edgeRemoved = output<string>();
   readonly selectedEdgeChange = output<string>();
   readonly selectionChange = output<string[]>();
   readonly contextMenu = output<{ x: number; y: number }>();
-  readonly drawingState = signal<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null);
+  readonly drawingState = signal<{ from: { x: number; y: number }; to: { x: number; y: number }; points: { x: number; y: number }[] } | null>(null);
   readonly drawPreview = this.drawingState.asReadonly();
   readonly Math = Math;
   readonly canvas = viewChild(FCanvasComponent);
@@ -269,6 +273,11 @@ export class GraphCanvas {
     }
   };
   connectionType(edge: Graph['edges'][number]) {
+    // Foblex has no stable adaptive router. Render it through the supported
+    // segment connector while keeping the persisted type for the inspector.
+    return edge.type === 'adaptive' ? 'segment' : this.edgeType(edge);
+  }
+  edgeType(edge: Graph['edges'][number]) {
     return ['straight', 'segment', 'bezier', 'adaptive'].includes(edge.type)
       ? edge.type
       : 'straight';
@@ -279,24 +288,52 @@ export class GraphCanvas {
     event.stopPropagation();
     this.edgeRemoved.emit(id);
   }
-  private drawPoint(event: PointerEvent) { const rect = (event.currentTarget as SVGElement).getBoundingClientRect(); return { x: ((event.clientX - rect.left) / rect.width) * 1800, y: ((event.clientY - rect.top) / rect.height) * 1100 }; }
+  private drawPoint(event: PointerEvent) {
+    const svg = event.currentTarget as SVGSVGElement;
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+    const matrix = svg.getScreenCTM();
+    if (matrix) {
+      const mapped = point.matrixTransform(matrix.inverse());
+      return { x: Math.max(0, Math.min(1800, mapped.x)), y: Math.max(0, Math.min(1100, mapped.y)) };
+    }
+    const rect = svg.getBoundingClientRect();
+    return { x: ((event.clientX - rect.left) / rect.width) * 1800, y: ((event.clientY - rect.top) / rect.height) * 1100 };
+  }
+  pointsAttribute(points: { x: number; y: number }[]) { return points.map((point) => `${point.x},${point.y}`).join(' '); }
   beginDraw(event: PointerEvent) {
     if (!this.drawTool()) return;
     event.preventDefault();
+    event.stopPropagation();
     const point = this.drawPoint(event);
     if (this.drawTool() === 'text' || this.drawTool() === 'icon') { this.finishPointDraw(point, point); return; }
-    this.drawingState.set({ from: point, to: point });
+    (event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId);
+    this.drawingState.set({ from: point, to: point, points: [point] });
   }
-  moveDraw(event: PointerEvent) { if (this.drawingState()) this.drawingState.update((state) => state ? { ...state, to: this.drawPoint(event) } : state); }
-  endDraw(event: PointerEvent) { if (this.drawingState()) this.finishPointDraw(this.drawingState()!.from, this.drawPoint(event)); }
-  private finishPointDraw(from: { x: number; y: number }, to: { x: number; y: number }) {
+  moveDraw(event: PointerEvent) {
+    const state = this.drawingState();
+    if (!state) return;
+    event.preventDefault();
+    const point = this.drawPoint(event);
+    this.drawingState.set({ ...state, to: point, points: [...state.points, point] });
+  }
+  endDraw(event: PointerEvent) {
+    const state = this.drawingState();
+    if (!state) return;
+    event.preventDefault();
+    this.finishPointDraw(state.from, this.drawPoint(event), state.points);
+    (event.currentTarget as SVGSVGElement).releasePointerCapture?.(event.pointerId);
+  }
+  cancelDraw(event: PointerEvent) { this.drawingState.set(null); (event.currentTarget as SVGSVGElement).releasePointerCapture?.(event.pointerId); }
+  private finishPointDraw(from: { x: number; y: number }, to: { x: number; y: number }, points = [from, to]) {
     const tool = this.drawTool();
     if (!tool) return;
     const base = { id: crypto.randomUUID(), color: '#7c3aed', opacity: 1 };
     let item: DrawItem;
     if (tool === 'text') item = { ...base, kind: 'text', position: to, text: window.prompt('Texto da anotação') || '', fontSize: 16 };
     else if (tool === 'icon') item = { ...base, kind: 'icon', position: to, icon: 'sparkles' };
-    else item = { ...base, kind: tool, from, to, strokeWidth: 2 } as DrawItem;
+    else item = { ...base, kind: tool, from, to, points, strokeWidth: 2 } as DrawItem;
     if (item.kind === 'text' && !item.text) { this.drawingState.set(null); return; }
     this.graphChange.emit({ ...this.graph(), drawings: [...(this.graph().drawings || []), item] });
     this.drawingState.set(null);
