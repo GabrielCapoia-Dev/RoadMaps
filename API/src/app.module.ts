@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { RoadmapsModule } from './modules/roadmaps/roadmaps.module.js';
 import { ProgressModule } from './modules/progress/progress.module.js';
+import { CommunityModule } from './modules/community/community.module.js';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { envFilePaths, validateEnvironment } from './config/environment.js';
 import { HealthModule } from './infrastructure/health/health.module.js';
@@ -26,6 +27,7 @@ import { HealthModule } from './infrastructure/health/health.module.js';
     UsersModule,
     RoadmapsModule,
     ProgressModule,
+    CommunityModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
