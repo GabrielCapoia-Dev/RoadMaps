@@ -286,6 +286,20 @@ small {
   gap: 0;
   padding: 14px 0 14px 10px;
 }
+.app-shell.editor-mode .editor-inspector.has-edge {
+  position: fixed;
+  top: 92px;
+  right: 16px;
+  width: 360px;
+  max-height: calc(100vh - 116px);
+  z-index: 35;
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid #d9c9f8;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .98);
+  box-shadow: 0 16px 38px rgba(50, 16, 94, .16);
+}
 .topbar {
   height: 83px;
   background: #fff;
@@ -1398,7 +1412,7 @@ app-tour p {
   width: var(--node-width, 220px) !important;
   min-height: var(--node-height, 96px) !important;
   height: var(--node-height, 96px);
-  background: var(--node-background, white);
+  background: var(--node-background, white) !important;
   border: 1px solid #dce6f5;
   border-radius: 11px;
   padding: 14px;
@@ -1481,8 +1495,8 @@ app-tour p {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--pale);
-  color: var(--blue);
+  background: color-mix(in srgb, var(--node-color) 12%, white);
+  color: var(--node-color);
   border-bottom: 3px solid var(--node-color);
   flex-shrink: 0;
 }
@@ -1720,6 +1734,8 @@ app-tour p {
 .app-shell.editor-mode .editor-layout:has(.editor-inspector.has-node) { grid-template-columns: minmax(0, 1fr); }
 .app-shell.editor-mode .editor-main { grid-column: 2; grid-row: 1; }
 .app-shell.editor-mode .editor-layout:has(.editor-inspector.has-node) .editor-main { grid-column: 1; }
+.app-shell.editor-mode .editor-layout:has(.editor-inspector.has-edge) { grid-template-columns: minmax(0, 1fr); }
+.app-shell.editor-mode .editor-layout:has(.editor-inspector.has-edge) .editor-main { grid-column: 1; }
 .app-shell.editor-mode .editor-inspector { grid-column: 1; grid-row: 1; border-left: 0; border-right: 1px solid var(--border); }
 .editor-main {
   padding: 20px;
