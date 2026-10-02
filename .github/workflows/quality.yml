@@ -1,0 +1,56 @@
+name: Quality
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+        env:
+          POSTGRES_USER: breadcrumbs
+          POSTGRES_PASSWORD: breadcrumbs_ci_only
+          POSTGRES_DB: breadcrumbs
+        ports: ['5433:5432']
+        options: --health-cmd "pg_isready -U breadcrumbs -d breadcrumbs" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://breadcrumbs:breadcrumbs_ci_only@localhost:5433/breadcrumbs
+      POSTGRES_PASSWORD: breadcrumbs_ci_only
+      SMTP_HOST: smtp.example.invalid
+      SMTP_PORT: '587'
+      MAIL_FROM: ci@example.invalid
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            API/package-lock.json
+            ANGULAR/package-lock.json
+      - run: npm ci
+      - run: npm --prefix API ci
+      - run: npm --prefix ANGULAR ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm run docs:generate
+      - run: git diff --exit-code -- docs/openapi/openapi.json docs/postman/roadmaps.postman_collection.json
+      - run: docker compose config --quiet
+      - run: docker compose -f docker-compose.production.yml config --quiet
+      - run: docker compose up -d --build --wait --wait-timeout 180
+      - run: npm run smoke
+      - if: always()
+        run: docker compose logs --no-color && docker compose down
+      - run: docker compose -f docker-compose.production.yml up -d --build --wait --wait-timeout 180
+      - run: npm run smoke
+        env:
+          EXPECT_SWAGGER: 'false'
+      - if: always()
+        run: docker compose -f docker-compose.production.yml logs --no-color && docker compose -f docker-compose.production.yml down
