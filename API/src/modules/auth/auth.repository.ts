@@ -38,27 +38,27 @@ export class AuthRepository {
       );
     });
   }
-  async verify(hash: string): Promise<boolean> {
+  async verify(hash: string): Promise<string | undefined> {
     return this.db.transaction(async (tx) => {
       const [candidate] = await this.db.query<{ user_id: string }>(
         'SELECT user_id FROM email_verifications WHERE token_hash=$1',
         [hash],
         tx,
       );
-      if (!candidate) return false;
+      if (!candidate) return undefined;
       await this.db.query('SELECT id FROM users WHERE id=$1 FOR UPDATE', [candidate.user_id], tx);
       const [token] = await this.db.query<{ user_id: string }>(
         'DELETE FROM email_verifications WHERE token_hash=$1 AND expires_at>now() RETURNING user_id',
         [hash],
         tx,
       );
-      if (!token) return false;
+      if (!token) return undefined;
       await this.db.query(
         'UPDATE users SET verified_at=COALESCE(verified_at,now()) WHERE id=$1',
         [token.user_id],
         tx,
       );
-      return true;
+      return token.user_id;
     });
   }
   async session(userId: string, hash: string, expires: Date): Promise<void> {

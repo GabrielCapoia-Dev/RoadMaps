@@ -118,7 +118,7 @@ export function templateGraph(template: StudyTemplate): Graph {
     description: 'Adicione suas anotações, materiais e atividades para esta etapa.',
     required: true,
     position: { x: i === 0 ? 300 : i % 2 === 1 ? 140 : 460, y: 60 + Math.ceil(i / 2) * 170 },
-    color: i === 0 ? '#14B8A6' : i === template.steps.length - 1 ? '#F472B6' : '#2563EB',
+    color: i === 0 ? '#a855f7' : i === template.steps.length - 1 ? '#d946ef' : '#7c3aed',
     resources: [],
   }));
   return {

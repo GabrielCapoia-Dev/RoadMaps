@@ -25,7 +25,8 @@ export class MailService {
         from: this.config.getOrThrow<string>('MAIL_FROM'),
         to: email,
         subject: 'Confirme seu e-mail — BreadCrumbs',
-        text: `Confirme seu cadastro na BreadCrumbs usando este token:\n\n${token}\n\nEnvie-o em POST /api/v1/auth/verify-email, campo token. Ele expira em 30 minutos e só pode ser usado uma vez. Se não solicitou o cadastro, ignore esta mensagem.`,
+        text: this.message(token),
+        html: `<p>Confirme seu cadastro na BreadCrumbs:</p><p><a href="${this.url(token)}">Confirmar meu e-mail</a></p><p>O link expira em 30 minutos e só pode ser usado uma vez. Se você não solicitou o cadastro, ignore esta mensagem.</p>`,
       });
     } catch {
       throw new ServiceUnavailableException(
@@ -34,5 +35,11 @@ export class MailService {
     } finally {
       transport.close();
     }
+  }
+  private url(token: string): string {
+    return `${this.config.getOrThrow<string>('PUBLIC_APP_URL')}/confirmar-email?token=${encodeURIComponent(token)}`;
+  }
+  private message(token: string): string {
+    return `Confirme seu cadastro na BreadCrumbs acessando este link:\n\n${this.url(token)}\n\nO link expira em 30 minutos e só pode ser usado uma vez. Se você não solicitou o cadastro, ignore esta mensagem.`;
   }
 }

@@ -1,13 +1,13 @@
 @use '@fontsource-variable/manrope';
 :root {
-  --navy: #0f2d5b;
-  --blue: #2563eb;
-  --teal: #14b8a6;
-  --coral: #f472b6;
-  --bg: #f4f6f8;
+  --navy: #32105e;
+  --blue: #7c3aed;
+  --teal: #a855f7;
+  --coral: #d946ef;
+  --bg: #faf7ff;
   --muted: #65748b;
-  --border: #e6ebf2;
-  --pale: #edf3ff;
+  --border: #eadcf7;
+  --pale: #f3e8ff;
   --radius: 14px;
   font-family: 'Manrope Variable', sans-serif;
   color: var(--navy);
@@ -86,7 +86,7 @@ small {
   color: var(--muted);
 }
 :focus-visible {
-  outline: 3px solid #2563eb;
+  outline: 3px solid #7c3aed;
   outline-offset: 4px;
 }
 .skip-link {
@@ -147,7 +147,7 @@ small {
   background: #f6f8fc;
 }
 .sidebar nav a.active {
-  background: #edf3ff;
+  background: #f3e8ff;
   color: var(--blue);
   box-shadow: inset 3px 0 var(--blue);
 }
@@ -324,11 +324,11 @@ main {
 .button.primary {
   color: white;
   background: var(--blue);
-  box-shadow: 0 4px 9px #2563eb16;
+  box-shadow: 0 4px 9px #7c3aed16;
 }
 .button.primary:hover {
   background: #1d4ed8;
-  box-shadow: 0 5px 15px #2563eb25;
+  box-shadow: 0 5px 15px #7c3aed25;
 }
 .button.secondary {
   background: white;
@@ -369,7 +369,7 @@ main {
   color: #60728d;
 }
 .icon-button:hover {
-  background: #edf3ff;
+  background: #f3e8ff;
   color: var(--blue);
 }
 .text-button {
@@ -478,7 +478,7 @@ main {
   position: absolute;
   background: #ffffffed;
   border: 1px solid #e3ebf6;
-  box-shadow: 0 8px 24px #0f2d5b0d;
+  box-shadow: 0 8px 24px #32105e0d;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -542,11 +542,11 @@ main {
   left: 60px;
   width: 58px;
   height: 4px;
-  background: linear-gradient(90deg, #14b8a6 65%, #edf2f7 65%);
+  background: linear-gradient(90deg, #a855f7 65%, #edf2f7 65%);
   border-radius: 4px;
 }
 .node-create .tiny-progress {
-  background: linear-gradient(90deg, #f472b6 30%, #edf2f7 30%);
+  background: linear-gradient(90deg, #d946ef 30%, #edf2f7 30%);
 }
 .node-status {
   position: absolute;
@@ -628,7 +628,7 @@ main {
 }
 .category-list button.selected {
   border-color: #bdd0fa;
-  background: #edf3ff;
+  background: #f3e8ff;
   color: var(--blue);
   font-weight: 800;
 }
@@ -743,7 +743,7 @@ main {
   height: 100%;
 }
 .roadmap-card:hover {
-  box-shadow: 0 8px 25px #0f2d5b0e;
+  box-shadow: 0 8px 25px #32105e0e;
   transform: translateY(-3px);
 }
 .card-art {
@@ -788,7 +788,7 @@ main {
   bottom: -80px;
   width: 144px;
   height: 144px;
-  background: #2563eb;
+  background: #7c3aed;
   transform: rotate(40deg);
   border-radius: 17px;
 }
@@ -1114,7 +1114,7 @@ dialog {
   max-height: calc(100dvh - 40px);
   overflow: auto;
   color: var(--navy);
-  box-shadow: 0 24px 90px #0f2d5b30;
+  box-shadow: 0 24px 90px #32105e30;
 }
 dialog::backdrop {
   background: #0c244f66;
@@ -1150,7 +1150,7 @@ dialog > p {
   transform: translateX(-50%);
   background: var(--navy);
   color: white;
-  box-shadow: 0 8px 30px #0f2d5b33;
+  box-shadow: 0 8px 30px #32105e33;
   padding: 12px 14px 12px 20px;
   border-radius: 12px;
   display: flex;
@@ -1250,7 +1250,7 @@ app-tour p {
   border: 1px solid var(--border);
   padding: 35px;
   border-radius: 18px;
-  box-shadow: 0 10px 40px #0f2d5b05;
+  box-shadow: 0 10px 40px #32105e05;
 }
 .auth-card h2 {
   margin-top: 22px;
@@ -1306,7 +1306,7 @@ app-tour p {
   border: 1px solid #dce6f5;
   border-radius: 11px;
   padding: 14px;
-  box-shadow: 0 4px 15px #0f2d5b09;
+  box-shadow: 0 4px 15px #32105e09;
   display: flex;
   gap: 12px;
   align-items: center;
@@ -1315,7 +1315,7 @@ app-tour p {
 }
 .graph-node.selected {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px #2563eb16;
+  box-shadow: 0 0 0 3px #7c3aed16;
 }
 .graph-node strong {
   font-size: 12px;
@@ -1945,7 +1945,7 @@ app-tour p {
   .sidebar {
     display: none;
     width: 260px;
-    box-shadow: 10px 0 50px #0f2d5b22;
+    box-shadow: 10px 0 50px #32105e22;
   }
   .sidebar.mobile-open {
     display: flex;

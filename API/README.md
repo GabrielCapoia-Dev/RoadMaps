@@ -19,11 +19,11 @@ API REST NestJS 12, TypeScript estrito e ESM. Base: `/api/v1`. Swagger: `/api/do
 
 ## Autenticação
 
-Cadastre nome, e-mail e senha de 12 a 128 caracteres. O e-mail é normalizado para minúsculas. Antes da confirmação, login retorna `403`. A mensagem contém um token de 30 minutos, consumido apenas uma vez por `POST /auth/verify-email`. Reenvio invalida o token anterior. Cadastros duplicados e reenvios respondem com mensagem genérica, sem revelar um token.
+Cadastre nome, e-mail e senha de 12 a 128 caracteres. O e-mail é normalizado para minúsculas. Antes da confirmação, login retorna `403`. O cadastro envia um link HTTPS de 30 minutos; a página chama `POST /auth/verify-email` com o token, consumido apenas uma vez, e recebe uma sessão autenticada para redirecionar o usuário à plataforma. Reenvio invalida o link anterior. Cadastros duplicados e reenvios respondem com mensagem genérica, sem revelar um token.
 
 O login retorna `accessToken`, `tokenType: Bearer` e `expiresAt`. Envie `Authorization: Bearer <accessToken>` nas rotas protegidas. A sessão dura sete dias e logout a revoga imediatamente. Somente hashes dos tokens ficam no banco; senhas usam scrypt com salt individual. Não são JWTs. Perfis públicos não expõem e-mail, hash de senha, sessão ou progresso.
 
-No desenvolvimento, leia a mensagem em http://localhost:8025. O envio SMTP é síncrono; falha retorna `503` e a conta pode recuperar o fluxo pelo reenvio. Não há fila de e-mails ou retentativa automática. A integração não exige provedor externo para executar localmente. Em produção, configure SMTP real com TLS; nunca desabilite validação de certificado.
+No desenvolvimento, leia a mensagem em http://localhost:8025. O envio SMTP é síncrono; falha retorna `503` e a conta pode recuperar o fluxo pelo reenvio. Não há fila de e-mails ou retentativa automática. A integração não exige provedor externo para executar localmente. Em produção, configure SMTP real com TLS e `PUBLIC_APP_URL` com a origem HTTPS pública; nunca desabilite validação de certificado.
 
 ## Exemplo de roadmap e grafo
 

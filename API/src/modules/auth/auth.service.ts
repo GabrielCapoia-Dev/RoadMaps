@@ -42,18 +42,22 @@ export class AuthService {
     await this.mail.verification(email, token);
   }
   async verify(token: string) {
-    if (!(await this.repo.verify(tokenHash(token))))
+    const userId = await this.repo.verify(tokenHash(token));
+    if (!userId)
       throw new BadRequestException('Token inválido ou expirado.');
-    return { message: 'E-mail confirmado.' };
+    return this.createSession(userId);
   }
   async login(dto: LoginDto) {
     const account = await this.repo.byEmail(dto.email);
     if (!(await checkPassword(dto.password, account?.password_hash)) || !account)
       throw new UnauthorizedException('Credenciais inválidas.');
     if (!account.verified_at) throw new ForbiddenException('Confirme seu e-mail antes de entrar.');
+    return this.createSession(account.id);
+  }
+  private async createSession(userId: string) {
     const token = newToken();
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    await this.repo.session(account.id, tokenHash(token), expires);
+    await this.repo.session(userId, tokenHash(token), expires);
     return { accessToken: token, tokenType: 'Bearer', expiresAt: expires.toISOString() };
   }
   async logout(hash: string) {

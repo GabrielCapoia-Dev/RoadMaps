@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   form,
@@ -50,7 +50,7 @@ import { Icon } from '../../../shared/icon/icon';
           mode() === 'register'
             ? 'Crie sua conta e dê forma às suas ideias.'
             : mode() === 'verify'
-              ? 'Cole o código que enviamos para seu e-mail.'
+              ? 'A confirmação será concluída automaticamente pelo link enviado para seu e-mail.'
               : 'Entre para continuar de onde parou.'
         }}
       </p>
@@ -82,12 +82,8 @@ import { Icon } from '../../../shared/icon/icon';
           }
         } @else {
           <label
-            >Código de confirmação<textarea
-              [formField]="fields.token"
-              rows="3"
-              autocomplete="one-time-code"
-              spellcheck="false"
-            ></textarea>
+            >Link de confirmação
+            <span class="muted">Abra o link recebido no e-mail para confirmar sua conta.</span>
           </label>
         }
         @for (error of fields().errorSummary(); track $index) {
@@ -127,18 +123,18 @@ import { Icon } from '../../../shared/icon/icon';
       @if (mode() === 'verify') {
         <form (submit)="resend($event)" class="resend-form">
           <label
-            >E-mail para reenviar o código<input
+            >E-mail para reenviar o link<input
               type="email"
               autocomplete="email"
               [formField]="resendFields.email" /></label
-          ><button class="button secondary full-width" [disabled]="busy()">Reenviar código</button>
+          ><button class="button secondary full-width" [disabled]="busy()">Reenviar link</button>
         </form>
         <a routerLink="/entrar" class="text-link">Voltar para entrar</a>
       }
     </section>
   </div>`,
 })
-export class AuthPage {
+export class AuthPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private api = inject(Api);
@@ -165,7 +161,7 @@ export class AuthPage {
     maxLength(s.password, 128);
     hidden(s.token, () => this.mode() !== 'verify');
     required(s.token, { message: 'Informe o código recebido por e-mail.' });
-    pattern(s.token, /^[a-f0-9]{64}$/, { message: 'Cole o código completo de 64 caracteres.' });
+    pattern(s.token, /^[a-f0-9]{64}$/, { message: 'Abra o link recebido por e-mail.' });
   });
   readonly resendModel = signal({ email: '' });
   readonly resendFields = form(this.resendModel, (s) => {
@@ -176,6 +172,25 @@ export class AuthPage {
   readonly attempted = signal(false);
   readonly error = signal('');
   readonly message = signal('');
+  ngOnInit() {
+    if (this.mode() === 'verify' && this.model().token) void this.verifyFromLink();
+  }
+  private async verifyFromLink() {
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      const auth = await this.api.post<{ accessToken: string; expiresAt: string }>(
+        '/auth/verify-email',
+        { token: this.model().token.trim() },
+      );
+      await this.session.start(auth.accessToken, auth.expiresAt);
+      await this.router.navigateByUrl('/meus-roadmaps');
+    } catch (e) {
+      this.error.set(errorMessage(e));
+    } finally {
+      this.busy.set(false);
+    }
+  }
   send(event: Event) {
     event.preventDefault();
     this.attempted.set(true);
@@ -196,8 +211,7 @@ export class AuthPage {
           });
           await this.router.navigate(['/confirmar-email']);
         } else {
-          await this.api.post('/auth/verify-email', { token: m.token.trim() });
-          this.message.set('E-mail confirmado. Agora você pode entrar na sua conta.');
+          await this.verifyFromLink();
         }
       } catch (e) {
         this.error.set(
@@ -224,7 +238,7 @@ export class AuthPage {
         await this.api.post('/auth/resend-verification', {
           email: this.resendModel().email.trim(),
         });
-        this.message.set('Se houver uma conta pendente, um novo código será enviado.');
+        this.message.set('Se houver uma conta pendente, um novo link será enviado.');
       } catch (e) {
         this.error.set(
           e instanceof HttpErrorResponse && this.mode() === 'login'

@@ -37,7 +37,7 @@ import { Icon } from '../icon/icon';
             [fNodeDraggingDisabled]="!editable()"
             class="graph-node"
             [class.selected]="selected() === node.id"
-            [style.--node-color]="node.color || '#2563EB'"
+            [style.--node-color]="node.color || '#7c3aed'"
             role="button"
             tabindex="0"
             [attr.aria-label]="'Etapa: ' + node.title"

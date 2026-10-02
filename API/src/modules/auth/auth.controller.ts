@@ -34,7 +34,7 @@ export class AuthController {
   @Public()
   @Post('verify-email')
   @HttpCode(200)
-  @ApiOkResponse({ type: MessageDto })
+  @ApiOkResponse({ type: SessionDto })
   verify(@Body() dto: VerifyEmailDto) {
     return this.service.verify(dto.token);
   }

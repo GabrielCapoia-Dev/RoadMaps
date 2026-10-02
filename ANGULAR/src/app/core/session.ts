@@ -26,7 +26,10 @@ export class Session {
       email,
       password,
     });
-    this.tokens.set(auth.accessToken, auth.expiresAt);
+    await this.start(auth.accessToken, auth.expiresAt);
+  }
+  async start(accessToken: string, expiresAt: string) {
+    this.tokens.set(accessToken, expiresAt);
     this.profile.set(await this.api.get<User>('/users/me'));
     this.ready.set(true);
   }

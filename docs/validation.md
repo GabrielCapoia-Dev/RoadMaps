@@ -12,7 +12,7 @@ Verificado em 01/10/2026, horário de São Paulo. Os registros da fundação aba
 - Smoke HTTP e smoke de produto pelo Nginx aprovados, incluindo PostgreSQL e SMTP/Mailpit. Dados de teste são isolados e removidos pelo próprio fluxo; nenhuma conta real foi alterada.
 - A instalação automática Foblex inicialmente sobrescreveu a lista de estilos por configuração e acrescentou opção incompatível ao runner de testes. As configurações foram corrigidas e os checks passaram. Durante hot reload, uma aba antiga ficou com referência a chunk substituído; a revisão visual final usa a aplicação atualizada.
 
-O frontend usa salvamento explícito, sem colaboração em tempo real. Metadados e grafo são duas operações versionadas; uma falha posterior não desfaz a primeira. A confirmação usa código copiado do e-mail. A API de perfil não informa se o usuário atual segue uma pessoa, por isso o perfil oferece ações explícitas de seguir/deixar de seguir. Guia de uso em [ANGULAR/README.md](../ANGULAR/README.md).
+O frontend usa salvamento explícito, sem colaboração em tempo real. Metadados e grafo são duas operações versionadas; uma falha posterior não desfaz a primeira. A confirmação usa link de uso único enviado por e-mail e inicia uma sessão autenticada após o clique. A API de perfil não informa se o usuário atual segue uma pessoa, por isso o perfil oferece ações explícitas de seguir/deixar de seguir. Guia de uso em [ANGULAR/README.md](../ANGULAR/README.md).
 
 ## API de produto — resultados anteriores
 

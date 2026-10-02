@@ -488,7 +488,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MessageDto"
+                  "$ref": "#/components/schemas/SessionDto"
                 }
               }
             }

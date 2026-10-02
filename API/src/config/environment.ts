@@ -13,6 +13,7 @@ export interface Environment {
   SMTP_USER?: string;
   SMTP_PASSWORD?: string;
   MAIL_FROM: string;
+  PUBLIC_APP_URL: string;
 }
 
 // Paths stay stable when executed from src/config or compiled dist/config.
@@ -85,15 +86,30 @@ export function validateEnvironment(input: Record<string, unknown>): Environment
   const mailFrom = input.MAIL_FROM ?? 'BreadCrumbs <no-reply@breadcrumbs.local>';
   if (typeof mailFrom !== 'string' || !mailFrom.includes('@') || /[\r\n]/.test(mailFrom))
     throw new Error('MAIL_FROM must be an email sender.');
+  const publicAppUrl = input.PUBLIC_APP_URL ?? 'http://localhost:4200';
+  if (typeof publicAppUrl !== 'string') throw new Error('PUBLIC_APP_URL must be an HTTP(S) URL.');
+  try {
+    const parsed = new URL(publicAppUrl);
+    if (
+      !['http:', 'https:'].includes(parsed.protocol) ||
+      !parsed.hostname ||
+      parsed.username ||
+      parsed.password
+    )
+      throw new Error();
+  } catch {
+    throw new Error('PUBLIC_APP_URL must be an HTTP(S) URL.');
+  }
   if (
     nodeEnv === 'production' &&
     (!input.DATABASE_URL ||
       databaseUrl.includes('breadcrumbs_local') ||
       !input.SMTP_HOST ||
-      !input.MAIL_FROM)
+      !input.MAIL_FROM ||
+      !input.PUBLIC_APP_URL)
   )
     throw new Error(
-      'Production requires explicit DATABASE_URL, SMTP_HOST and MAIL_FROM, without development database credentials.',
+      'Production requires explicit DATABASE_URL, SMTP_HOST, MAIL_FROM and PUBLIC_APP_URL, without development database credentials.',
     );
   if ((input.SMTP_USER && !input.SMTP_PASSWORD) || (!input.SMTP_USER && input.SMTP_PASSWORD))
     throw new Error('SMTP_USER and SMTP_PASSWORD must be configured together.');
@@ -109,6 +125,7 @@ export function validateEnvironment(input: Record<string, unknown>): Environment
     SMTP_USER: typeof input.SMTP_USER === 'string' ? input.SMTP_USER : undefined,
     SMTP_PASSWORD: typeof input.SMTP_PASSWORD === 'string' ? input.SMTP_PASSWORD : undefined,
     MAIL_FROM: mailFrom,
+    PUBLIC_APP_URL: publicAppUrl.replace(/\/$/, ''),
     SWAGGER_ENABLED:
       rawSwagger === undefined
         ? nodeEnv !== 'production'

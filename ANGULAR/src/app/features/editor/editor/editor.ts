@@ -321,7 +321,7 @@ export class Editor {
             x: 100 + (this.graph().nodes.length % 3) * 240,
             y: 80 + Math.floor(this.graph().nodes.length / 3) * 160,
           },
-          color: '#2563EB',
+          color: '#7c3aed',
           resources: [],
         },
       ],

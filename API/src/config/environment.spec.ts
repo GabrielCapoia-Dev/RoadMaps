@@ -21,6 +21,7 @@ describe('environment validation', () => {
       DATABASE_URL: 'postgresql://app:unique-password@db:5432/app',
       SMTP_HOST: 'smtp.example.com',
       MAIL_FROM: 'app@example.com',
+      PUBLIC_APP_URL: 'https://app.example.com',
     };
     expect(validateEnvironment(production).SWAGGER_ENABLED).toBe(false);
     expect(validateEnvironment({ ...production, SWAGGER_ENABLED: 'true' }).SWAGGER_ENABLED).toBe(
@@ -36,6 +37,9 @@ describe('environment validation', () => {
     expect(() => validateEnvironment({ SMTP_SECURE: 'yes' })).toThrow('SMTP_SECURE');
     expect(() => validateEnvironment({ SMTP_USER: 'user' })).toThrow('SMTP_USER');
     expect(() => validateEnvironment({ NODE_ENV: 'production' })).toThrow('Production');
+    expect(() => validateEnvironment({ PUBLIC_APP_URL: 'javascript:alert(1)' })).toThrow(
+      'PUBLIC_APP_URL',
+    );
   });
 
   it.each(['', '0', '65536', '-1', '3.14', '3000abc', '1e3', ' 3000 ', true])(

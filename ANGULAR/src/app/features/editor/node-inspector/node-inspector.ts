@@ -102,7 +102,7 @@ export class NodeInspector {
     description: '',
     type: 'module',
     required: true,
-    color: '#2563EB',
+    color: '#7c3aed',
     x: 0,
     y: 0,
   });
@@ -135,7 +135,7 @@ export class NodeInspector {
         description: n.description,
         type: n.type,
         required: n.required,
-        color: n.color ?? '#2563EB',
+        color: n.color ?? '#7c3aed',
         x: n.position.x,
         y: n.position.y,
       };

@@ -4,9 +4,12 @@ import { Api } from '../../../core/api';
 import { Session } from '../../../core/session';
 import { AuthPage } from './auth-page';
 describe('Account forms', () => {
-  function setup(mode: string) {
+  function setup(mode: string, token = '') {
     const api = { post: vi.fn().mockResolvedValue({}) };
-    const session = { login: vi.fn().mockResolvedValue(undefined) };
+    const session = {
+      login: vi.fn().mockResolvedValue(undefined),
+      start: vi.fn().mockResolvedValue(undefined),
+    };
     TestBed.configureTestingModule({
       providers: [
         { provide: Api, useValue: api },
@@ -14,7 +17,7 @@ describe('Account forms', () => {
         { provide: Router, useValue: { navigate: vi.fn(), navigateByUrl: vi.fn() } },
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { data: { mode }, queryParamMap: new Map() } },
+          useValue: { snapshot: { data: { mode }, queryParamMap: new Map([['token', token]]) } },
         },
       ],
     });
@@ -46,5 +49,13 @@ describe('Account forms', () => {
     const { page } = setup('verify');
     page.model.update((m) => ({ ...m, token: 'a'.repeat(64) }));
     expect(page.fields().valid()).toBe(true);
+  });
+  it('confirms a valid email link automatically', async () => {
+    const { page, api, session } = setup('verify', 'a'.repeat(64));
+    page.ngOnInit();
+    await vi.waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/auth/verify-email', { token: 'a'.repeat(64) }),
+    );
+    expect(session.start).toHaveBeenCalledWith(expect.any(String), expect.any(String));
   });
 });
