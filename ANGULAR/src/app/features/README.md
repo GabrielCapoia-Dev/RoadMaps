@@ -1,8 +1,3 @@
 # Features
 
-Futuras funcionalidades serão organizadas por domínio, com páginas standalone, rotas,
-serviços de acesso a dados, interfaces e testes próximos do código que os utiliza.
-Cada feature poderá expor suas próprias rotas com lazy loading.
-
-`environment/` é apenas uma página técnica de validação do ambiente, removível quando
-as páginas reais forem definidas. Nenhuma regra de negócio foi implementada.
+Páginas standalone organizadas por fluxo: `auth`, `explore`, `library`, `roadmap`, `editor`, `community` e `profile`. O editor separa canvas, detalhes da etapa e compartilhamento. Rotas são carregadas sob demanda em `app.routes.ts`. `environment` permanece em `/ambiente` para diagnóstico.

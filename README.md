@@ -1,8 +1,8 @@
-# BreadCrumbs — API e ambiente de desenvolvimento
+# BreadCrumbs — trilhas de conhecimento
 
 **Crie, compartilhe e siga trilhas de conhecimento.** Plataforma de aprendizado com roadmaps em grafo, colaboração e comunidade, aberta a qualquer assunto.
 
-A API já implementa contas com confirmação de e-mail, sessões revogáveis, perfis, roadmaps, grafos, publicação, permissões, busca, progresso individual, comentários, favoritos, curtidas e seguidores. O Angular continua na página técnica; as telas de produto serão construídas em etapa própria.
+A API já implementa contas com confirmação de e-mail, sessões revogáveis, perfis, roadmaps, grafos, publicação, permissões, busca, progresso individual, comentários, favoritos, curtidas e seguidores. O frontend Angular implementa Explorar, autenticação, biblioteca, editor visual, estudo, comunidade e perfis com a identidade visual oficial.
 
 ## Iniciar
 
@@ -13,15 +13,15 @@ docker compose up -d --build --wait
 docker compose ps
 ```
 
-| Recurso                    | Endereço                                  |
-| -------------------------- | ----------------------------------------- |
-| Aplicação / página técnica | http://localhost:8080                     |
-| Swagger da API             | http://localhost:8080/api/docs            |
-| OpenAPI                    | http://localhost:8080/api/docs-json       |
-| Liveness                   | http://localhost:8080/api/v1/health       |
-| Prontidão do banco         | http://localhost:8080/api/v1/health/ready |
-| E-mails locais (Mailpit)   | http://localhost:8025                     |
-| PostgreSQL local           | localhost:5432                            |
+| Recurso                  | Endereço                                  |
+| ------------------------ | ----------------------------------------- |
+| Aplicação BreadCrumbs    | http://localhost:8080                     |
+| Swagger da API           | http://localhost:8080/api/docs            |
+| OpenAPI                  | http://localhost:8080/api/docs-json       |
+| Liveness                 | http://localhost:8080/api/v1/health       |
+| Prontidão do banco       | http://localhost:8080/api/v1/health/ready |
+| E-mails locais (Mailpit) | http://localhost:8025                     |
+| PostgreSQL local         | localhost:5432                            |
 
 A API fica atrás do Nginx, sem porta publicada. Banco, SMTP e Mailpit são publicados somente em loopback no desenvolvimento. E-mails locais são capturados no Mailpit e não enviados a destinatários externos. PostgreSQL usa o volume `postgres_data`; parar/recriar containers preserva os dados.
 
@@ -34,7 +34,7 @@ As migrações versionadas são aplicadas antes de `start:dev`/`start:prod`, com
 3. Execute `POST /api/v1/auth/login` e cole o `accessToken` em **Authorize** no Swagger, sem acrescentar `Bearer` ao valor.
 4. Crie um roadmap e salve seu grafo por `PUT /roadmaps/{id}/graph`, informando `expectedRevision`.
 
-O e-mail usa um token para teste da API; ainda não existe tela de confirmação no Angular. O [guia da API](API/README.md) descreve endpoints, exemplos, regras e execução nativa. As [decisões desta implementação](docs/architecture/api-v1.md) distinguem escolhas iniciais de requisitos do brief.
+Para usar a interface, crie sua conta em `/cadastro`, copie o código recebido no Mailpit e cole em `/confirmar-email`. O [guia do frontend](ANGULAR/README.md) explica telas, edição e compartilhamento. O [guia da API](API/README.md) descreve endpoints, exemplos, regras e execução nativa. As [decisões desta implementação](docs/architecture/api-v1.md) distinguem escolhas iniciais de requisitos do brief.
 
 ## Arquitetura
 
@@ -51,7 +51,7 @@ API/src/modules/        # auth, users, roadmaps, progress, community
 API/src/infrastructure/ # database e health
 API/migrations/         # SQL versionado, sem reset automático
 API/scripts/            # migrações, OpenAPI e smoke de produto
-ANGULAR/                # frontend; página técnica nesta etapa
+ANGULAR/                # frontend de produto Angular
 nginx/                  # gateway
 scripts/                # geração Postman e smoke HTTP
 docs/product/           # contexto oficial e brief preservado

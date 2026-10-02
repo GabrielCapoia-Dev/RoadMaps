@@ -2,7 +2,19 @@
 
 Verificado em 01/10/2026, horário de São Paulo. Os registros da fundação abaixo são históricos; a etapa posterior implementou a API de produto.
 
-## API de produto — resultados
+## Frontend de produto — 02/10/2026
+
+- Angular 22 com TypeScript/templates estritos, Signal Forms, componentes OnPush e rotas sob demanda. Builds da API e frontend aprovados; bundle inicial do frontend em aproximadamente 370 kB (95 kB estimados transferidos), abaixo do orçamento de 500 kB.
+- 23 testes Angular aprovados: roteamento/retorno à página solicitada, formulários, isolamento do token por origem, expiração, histórico do editor, remoção de conexões, revisões concorrentes e campos ainda não aplicados. 19 testes de configuração e 22 de integração da API aprovados. Total: 64.
+- O teste de papéis da API também verifica as capacidades retornadas por GET do roadmap. OpenAPI e Postman regenerados para esse acréscimo de contrato.
+- Navegador local: login, criação privada, etapa editada/salva/reaberta, conexão criada por formulário, progresso de 100%, favorito, comentário persistido e painel de compartilhamento. Grafo de modelo exibiu cinco etapas e quatro conexões sem diagnósticos Foblex durante a verificação inicial.
+- Layout revisado em desktop e 390 px; Explorar não apresentou rolagem horizontal. Tour manual, controles semânticos e navegação móvel verificados. Não houve certificação de acessibilidade nem benchmark de grafos grandes.
+- Smoke HTTP e smoke de produto pelo Nginx aprovados, incluindo PostgreSQL e SMTP/Mailpit. Dados de teste são isolados e removidos pelo próprio fluxo; nenhuma conta real foi alterada.
+- A instalação automática Foblex inicialmente sobrescreveu a lista de estilos por configuração e acrescentou opção incompatível ao runner de testes. As configurações foram corrigidas e os checks passaram. Durante hot reload, uma aba antiga ficou com referência a chunk substituído; a revisão visual final usa a aplicação atualizada.
+
+O frontend usa salvamento explícito, sem colaboração em tempo real. Metadados e grafo são duas operações versionadas; uma falha posterior não desfaz a primeira. A confirmação usa código copiado do e-mail. A API de perfil não informa se o usuário atual segue uma pessoa, por isso o perfil oferece ações explícitas de seguir/deixar de seguir. Guia de uso em [ANGULAR/README.md](../ANGULAR/README.md).
+
+## API de produto — resultados anteriores
 
 - 19 testes de configuração e 22 testes de integração HTTP aprovados, incluindo 15 cenários de produto com PostgreSQL real; 6 testes do Angular também passaram. Total: 47.
 - Cenários de produto: confirmação/reenvio/expiração, hashes e revogação de sessão, DTOs e campos não autorizados, grafos ramificados/desconectados, UUIDs duplicados, referências inválidas, concorrência com 409, preservação de PATCH, papéis e revogação, busca pública, progresso isolado, comentários, favoritos, perfis, onboarding, cascatas e rate limiting.
@@ -15,7 +27,7 @@ Verificado em 01/10/2026, horário de São Paulo. Os registros da fundação aba
 
 A stack temporária de produção foi encerrada, preservando seu volume. O desenvolvimento permanece em 8080, com PostgreSQL e Mailpit locais. Nenhuma imagem foi publicada e não houve deploy externo.
 
-O SMTP real de um provedor externo não foi configurado nem testado. O teste de produção verificou inicialização/HTTP/banco; envio foi validado somente no ambiente local com Mailpit. O frontend de produto continua pendente. Limitações e regras iniciais estão em [API v1](architecture/api-v1.md) e no [guia da API](../API/README.md).
+O SMTP real de um provedor externo não foi configurado nem testado. O teste de produção verificou inicialização/HTTP/banco; envio foi validado somente no ambiente local com Mailpit. Limitações e regras iniciais estão em [API v1](architecture/api-v1.md) e no [guia da API](../API/README.md).
 
 ## Resultados da fundação (histórico)
 

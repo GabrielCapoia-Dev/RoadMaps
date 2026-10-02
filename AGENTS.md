@@ -6,7 +6,7 @@ Leia o [contexto do produto](docs/product/README.md), o [brief integral](docs/pr
 
 ## Escopo incremental
 
-A visão global não autoriza implementar todas as funcionalidades. Siga a etapa solicitada pelo usuário. Após a fundação, o usuário solicitou a API: contas, roadmaps, permissões, progresso e comunidade agora estão implementados no backend. Consulte `docs/architecture/api-v1.md` e `API/README.md` para regras atuais. O frontend de produto continua pendente de etapa própria.
+A visão global não autoriza implementar todas as funcionalidades. Siga a etapa solicitada pelo usuário. Após a fundação, o usuário solicitou a API: contas, roadmaps, permissões, progresso e comunidade agora estão implementados no backend. Consulte `docs/architecture/api-v1.md` e `API/README.md` para regras atuais. O usuário também autorizou o frontend Angular de produto, agora implementado. Consulte `ANGULAR/README.md` e `docs/architecture/frontend-v1.md`.
 
 Não invente silenciosamente requisitos importantes. Distinga requisitos confirmados, propostas técnicas e questões abertas. Não crie módulos, entidades ou dependências apenas para antecipar a visão completa.
 
