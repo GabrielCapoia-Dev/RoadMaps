@@ -47,7 +47,8 @@ export interface StudyNode {
 export type DrawItem =
   | { id: string; kind: 'freehand' | 'line' | 'arrow' | 'rectangle' | 'circle'; color: string; strokeWidth: number; opacity: number; from: { x: number; y: number }; to: { x: number; y: number }; points?: { x: number; y: number }[] }
   | { id: string; kind: 'text'; color: string; fontSize: number; opacity: number; position: { x: number; y: number }; text: string }
-  | { id: string; kind: 'icon'; color: string; opacity: number; position: { x: number; y: number }; icon: string };
+  | { id: string; kind: 'icon'; color: string; opacity: number; position: { x: number; y: number }; icon: string }
+  | { id: string; kind: 'image'; color: string; opacity: number; position: { x: number; y: number }; src: string; width: number; height: number };
 export interface StudyEdge {
   id: string;
   source: string;

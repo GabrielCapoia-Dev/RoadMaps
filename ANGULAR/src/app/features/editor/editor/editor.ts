@@ -102,6 +102,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
             (selectedChange)="select($event)"
             (selectionChange)="selectMany($event)"
             (contextMenu)="openContextMenu($event)"
+            (drawToolChange)="drawTool.set($event)"
             (graphChange)="change($event)"
             (edgeRemoved)="removeEdge($event)"
             (selectedEdgeChange)="selectEdge($event)"
@@ -226,8 +227,8 @@ export class Editor {
   readonly graph = signal<Graph>({ nodes: [], edges: [] });
   readonly selected = signal('');
   readonly selectedIds = signal<string[]>([]);
-  readonly drawTool = signal<'' | 'freehand' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon'>('');
-  readonly drawTools = [{ value: 'freehand' as const, label: 'Desenhar livremente', icon: 'edit' }, { value: 'line' as const, label: 'Desenhar reta', icon: 'minus' }, { value: 'arrow' as const, label: 'Desenhar seta', icon: 'arrow' }, { value: 'rectangle' as const, label: 'Desenhar quadrado', icon: 'square' }, { value: 'circle' as const, label: 'Desenhar círculo', icon: 'circle' }, { value: 'text' as const, label: 'Adicionar texto solto', icon: 'edit' }, { value: 'icon' as const, label: 'Adicionar ícone', icon: 'sparkles' }];
+  readonly drawTool = signal<'' | 'freehand' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon' | 'image'>('');
+  readonly drawTools = [{ value: 'freehand' as const, label: 'Desenhar livremente', icon: 'edit' }, { value: 'line' as const, label: 'Desenhar reta', icon: 'minus' }, { value: 'arrow' as const, label: 'Desenhar seta', icon: 'arrow' }, { value: 'rectangle' as const, label: 'Desenhar quadrado', icon: 'square' }, { value: 'circle' as const, label: 'Desenhar círculo', icon: 'circle' }, { value: 'text' as const, label: 'Adicionar texto solto', icon: 'edit' }, { value: 'icon' as const, label: 'Adicionar ícone', icon: 'sparkles' }, { value: 'image' as const, label: 'Colar imagem', icon: 'camera' }];
   readonly contextMenu = signal<{ x: number; y: number } | null>(null);
   readonly infoPanelOpen = signal(false);
   readonly selectedNode = computed(() => this.graph().nodes.find((n) => n.id === this.selected()));
