@@ -2,27 +2,37 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { App } from './app';
 import { appConfig } from './app.config';
-
-describe('Application routing', () => {
+import { Api } from './core/api';
+describe('Product routing', () => {
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [App], providers: appConfig.providers });
+    sessionStorage.clear();
+    TestBed.configureTestingModule({
+      imports: [App],
+      providers: [
+        ...appConfig.providers,
+        {
+          provide: Api,
+          useValue: {
+            get: vi.fn().mockResolvedValue({ items: [], page: 1, limit: 6, hasMore: false }),
+          },
+        },
+      ],
+    });
   });
-
-  it('renders the lazy technical page in the application outlet', async () => {
+  it('loads Explore and clearly identifies starter templates', async () => {
     const fixture = TestBed.createComponent(App);
     await TestBed.inject(Router).navigateByUrl('/');
     await fixture.whenStable();
-
-    expect(fixture.nativeElement.querySelector('h1')?.textContent).toBe('Ambiente preparado');
+    expect(fixture.nativeElement.querySelector('h1')?.textContent).toContain('Seu próximo passo');
+    expect(fixture.nativeElement.textContent).toContain('Modelo');
+    expect(fixture.nativeElement.querySelectorAll('app-roadmap-card')).toHaveLength(6);
   });
-
-  it('redirects unknown URLs to the environment page', async () => {
+  it('redirects an anonymous reader to login and preserves the return path', async () => {
     const fixture = TestBed.createComponent(App);
     const router = TestBed.inject(Router);
-    await router.navigateByUrl('/unknown-page');
+    await router.navigateByUrl('/meus-roadmaps?criar=sim');
     await fixture.whenStable();
-
-    expect(router.url).toBe('/');
-    expect(fixture.nativeElement.querySelector('h1')?.textContent).toBe('Ambiente preparado');
+    expect(router.url).toBe('/entrar?next=%2Fmeus-roadmaps%3Fcriar%3Dsim');
+    expect(fixture.nativeElement.textContent).toContain('Bom ter você por aqui');
   });
 });
