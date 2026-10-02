@@ -1,0 +1,11 @@
+import { Module } from '@nestjs/common';
+import { RoadmapsModule } from '../roadmaps/roadmaps.module.js';
+import { ProgressController } from './progress.controller.js';
+import { ProgressRepository } from './progress.repository.js';
+import { ProgressService } from './progress.service.js';
+@Module({
+  imports: [RoadmapsModule],
+  controllers: [ProgressController],
+  providers: [ProgressRepository, ProgressService],
+})
+export class ProgressModule {}
