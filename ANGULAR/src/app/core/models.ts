@@ -29,6 +29,7 @@ export interface StudyNode {
   required: boolean;
   position: { x: number; y: number };
   color?: string;
+  backgroundColor?: string;
   shape?: string;
   icon?: string;
   layout?: 'horizontal' | 'vertical';
@@ -36,8 +37,17 @@ export interface StudyNode {
   height?: number;
   opacity?: number;
   zIndex?: number;
+  fontWeight?: 'normal' | 'bold';
+  fontStyle?: 'normal' | 'italic';
+  textDecoration?: 'none' | 'underline';
+  fontSize?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  groupId?: string;
   resources: { label: string; url: string }[];
 }
+export type DrawItem =
+  | { id: string; kind: 'line' | 'arrow' | 'rectangle' | 'circle'; color: string; strokeWidth: number; opacity: number; from: { x: number; y: number }; to: { x: number; y: number } }
+  | { id: string; kind: 'text'; color: string; fontSize: number; opacity: number; position: { x: number; y: number }; text: string }
+  | { id: string; kind: 'icon'; color: string; opacity: number; position: { x: number; y: number }; icon: string };
 export interface StudyEdge {
   id: string;
   source: string;
@@ -51,6 +61,7 @@ export interface StudyEdge {
 export interface Graph {
   nodes: StudyNode[];
   edges: StudyEdge[];
+  drawings?: DrawItem[];
 }
 export interface RoadmapSummary {
   id: string;

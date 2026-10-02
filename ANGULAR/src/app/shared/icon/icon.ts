@@ -35,6 +35,8 @@ const paths: Record<string, string> = {
   redo: 'm15 4 6 6-6 6 M21 10H9a6 6 0 0 0 0 12',
   minus: 'M5 12h14',
   fit: 'M8 3H3v5 M16 3h5v5 M21 16v5h-5 M3 16v5h5',
+  square: 'M4 4h16v16H4z',
+  circle: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
   save: 'M19 21H5a2 2 0 0 1-2-2V3h14l4 4v12a2 2 0 0 1-2 2 M7 3v6h10V3 M7 21v-8h10v8',
   flag: 'M4 22V3h16l-4 5 4 5H4',
   briefcase: 'M3 7h18v14H3z M8 7V3h8v4 M3 12h18',

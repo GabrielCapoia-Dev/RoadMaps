@@ -59,6 +59,10 @@ export class NodeDto {
   @IsOptional()
   @Matches(/^#[a-fA-F0-9]{6}$/)
   color?: string;
+  @ApiPropertyOptional({ example: '#FFFFFF' })
+  @IsOptional()
+  @Matches(/^#[a-fA-F0-9]{6}$/)
+  backgroundColor?: string;
   @ApiPropertyOptional({ example: 'rounded' })
   @IsOptional()
   @IsString()
@@ -97,6 +101,11 @@ export class NodeDto {
   @Min(-10000)
   @Max(10000)
   zIndex?: number;
+  @ApiPropertyOptional({ enum: ['normal', 'bold'] }) @IsOptional() @IsIn(['normal', 'bold']) fontWeight?: 'normal' | 'bold';
+  @ApiPropertyOptional({ enum: ['normal', 'italic'] }) @IsOptional() @IsIn(['normal', 'italic']) fontStyle?: 'normal' | 'italic';
+  @ApiPropertyOptional({ enum: ['none', 'underline'] }) @IsOptional() @IsIn(['none', 'underline']) textDecoration?: 'none' | 'underline';
+  @ApiPropertyOptional({ enum: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }) @IsOptional() @IsIn(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']) fontSize?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  @ApiPropertyOptional() @IsOptional() @IsUUID('4') groupId?: string;
   @ApiPropertyOptional({ type: [ResourceDto] })
   @IsArray()
   @ArrayMaxSize(30)
@@ -156,6 +165,12 @@ export class GraphDto {
   @ValidateNested({ each: true })
   @Type(() => EdgeDto)
   edges!: EdgeDto[];
+  @ApiPropertyOptional({ type: [Object], maxItems: 2000 })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(2000)
+  @IsObject({ each: true })
+  drawings?: Record<string, unknown>[];
 }
 export class RevisionDto {
   @ApiProperty({ minimum: 1, description: 'Revisão atual; divergências retornam 409.' })

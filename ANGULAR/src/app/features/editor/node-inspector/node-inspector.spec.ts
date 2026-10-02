@@ -32,6 +32,7 @@ describe('Node inspector drafts', () => {
     expect(changed).toHaveBeenCalledWith({
       ...node,
       title: 'Uma nova ideia',
+      backgroundColor: '#ffffff',
       shape: 'rounded',
       icon: 'layers',
       layout: 'horizontal',
@@ -39,6 +40,10 @@ describe('Node inspector drafts', () => {
       height: 84,
       opacity: 1,
       zIndex: 0,
+      fontWeight: 'bold',
+      fontStyle: 'normal',
+      textDecoration: 'none',
+      fontSize: 'h4',
     });
   });
 });

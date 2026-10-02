@@ -6,7 +6,7 @@ import {
   FCreateConnectionEvent,
   FMoveNodesEvent,
 } from '@foblex/flow';
-import type { Graph } from '../../core/models';
+import type { DrawItem, Graph } from '../../core/models';
 import { Icon } from '../icon/icon';
 @Component({
   selector: 'app-graph-canvas',
@@ -48,14 +48,20 @@ import { Icon } from '../icon/icon';
             [style.--node-height]="sizeFor(node).height + 'px'"
             [style.opacity]="node.opacity || 1"
             [style.z-index]="node.zIndex || 0"
+            [style.--node-background]="node.backgroundColor || '#ffffff'"
+            [style.--node-title-weight]="node.fontWeight || 'bold'"
+            [style.--node-title-style]="node.fontStyle || 'normal'"
+            [style.--node-title-decoration]="node.textDecoration || 'none'"
+            [style.--node-title-size]="fontSize(node.fontSize)"
             class="graph-node"
-            [class.selected]="selected() === node.id"
+            [class.selected]="selected() === node.id || selectedIds().includes(node.id)"
             [style.--node-color]="node.color || '#7c3aed'"
             role="button"
             tabindex="0"
             [attr.aria-label]="'Etapa: ' + node.title"
-            [attr.aria-pressed]="selected() === node.id"
-            (click)="selectedChange.emit(node.id)"
+            [attr.aria-pressed]="selected() === node.id || selectedIds().includes(node.id)"
+            (click)="selectNode($event, node.id)"
+            (contextmenu)="openContextMenu($event)"
             (keydown.enter)="selectedChange.emit(node.id)"
             (keydown.space)="$event.preventDefault(); selectedChange.emit(node.id)"
           >
@@ -68,7 +74,7 @@ import { Icon } from '../icon/icon';
               [fConnectorMultiple]="true"
               [fConnectorDisabled]="!editable()"
             ></div>
-            <span class="node-type"><app-icon [name]="nodeIcon(node)" /></span>
+            @if (nodeIcon(node)) { <span class="node-type"><app-icon [name]="nodeIcon(node)" /></span> }
             <div>
               <strong>{{ node.title }}</strong
               ><small
@@ -95,7 +101,19 @@ import { Icon } from '../icon/icon';
             }
           </div>
         }
-        <f-connection-for-create /> </f-canvas
+        <f-connection-for-create />
+        <svg class="draw-layer" [class.active]="!!drawTool()" viewBox="0 0 1800 1100" preserveAspectRatio="none" (pointerdown)="beginDraw($event)" (pointermove)="moveDraw($event)" (pointerup)="endDraw($event)">
+          @for (item of graph().drawings || []; track item.id) {
+            @if (item.kind === 'line' || item.kind === 'arrow') { <line [attr.x1]="item.from.x" [attr.y1]="item.from.y" [attr.x2]="item.to.x" [attr.y2]="item.to.y" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" [attr.marker-end]="item.kind === 'arrow' ? 'url(#draw-arrow)' : null" /> }
+            @if (item.kind === 'rectangle') { <rect [attr.x]="Math.min(item.from.x, item.to.x)" [attr.y]="Math.min(item.from.y, item.to.y)" [attr.width]="Math.abs(item.to.x - item.from.x)" [attr.height]="Math.abs(item.to.y - item.from.y)" fill="none" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" /> }
+            @if (item.kind === 'circle') { <ellipse [attr.cx]="(item.from.x + item.to.x) / 2" [attr.cy]="(item.from.y + item.to.y) / 2" [attr.rx]="Math.abs(item.to.x - item.from.x) / 2" [attr.ry]="Math.abs(item.to.y - item.from.y) / 2" fill="none" [attr.stroke]="item.color" [attr.stroke-width]="item.strokeWidth" [attr.opacity]="item.opacity" /> }
+            @if (item.kind === 'text') { <text [attr.x]="item.position.x" [attr.y]="item.position.y" [attr.fill]="item.color" [attr.font-size]="item.fontSize" [attr.opacity]="item.opacity">{{ item.text }}</text> }
+            @if (item.kind === 'icon') { <text [attr.x]="item.position.x" [attr.y]="item.position.y" [attr.fill]="item.color" font-size="28" [attr.opacity]="item.opacity">✦</text> }
+          }
+          @if (drawPreview(); as preview) { <line [attr.x1]="preview.from.x" [attr.y1]="preview.from.y" [attr.x2]="preview.to.x" [attr.y2]="preview.to.y" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4" /> }
+          <defs><marker id="draw-arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="context-stroke" /></marker></defs>
+        </svg>
+        </f-canvas
     ></f-flow>
     <div class="graph-controls" aria-label="Controles do mapa">
       <button class="icon-button" (click)="zoom()?.zoomOut()" aria-label="Diminuir zoom">
@@ -118,10 +136,17 @@ export class GraphCanvas {
   readonly graph = input.required<Graph>();
   readonly editable = input(false);
   readonly selected = input('');
+  readonly selectedIds = input<string[]>([]);
+  readonly drawTool = input<'' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon'>('');
   readonly graphChange = output<Graph>();
   readonly selectedChange = output<string>();
   readonly edgeRemoved = output<string>();
   readonly selectedEdgeChange = output<string>();
+  readonly selectionChange = output<string[]>();
+  readonly contextMenu = output<{ x: number; y: number }>();
+  readonly drawingState = signal<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(null);
+  readonly drawPreview = this.drawingState.asReadonly();
+  readonly Math = Math;
   readonly canvas = viewChild(FCanvasComponent);
   readonly zoom = viewChild(FZoomDirective);
   private fitted = false;
@@ -174,6 +199,22 @@ export class GraphCanvas {
             ? 'check'
             : 'layers')
     );
+  }
+  fontSize(size: Graph['nodes'][number]['fontSize']) { return ({ h1: '24px', h2: '20px', h3: '17px', h4: '13px', h5: '11px', h6: '10px' }[size || 'h4']); }
+  selectNode(event: MouseEvent, id: string) {
+    event.stopPropagation();
+    if (event.shiftKey) {
+      this.selectionChange.emit(this.selectedIds().includes(id) ? this.selectedIds().filter((item) => item !== id) : [...this.selectedIds(), id]);
+      return;
+    }
+    this.selectionChange.emit([id]);
+    this.selectedChange.emit(id);
+  }
+  openContextMenu(event: MouseEvent) {
+    if (!this.editable()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.contextMenu.emit({ x: event.clientX, y: event.clientY });
   }
   sizeFor(node: Graph['nodes'][number]) {
     return this.resizeDraft()[node.id] ?? {
@@ -237,5 +278,27 @@ export class GraphCanvas {
     event.preventDefault();
     event.stopPropagation();
     this.edgeRemoved.emit(id);
+  }
+  private drawPoint(event: PointerEvent) { const rect = (event.currentTarget as SVGElement).getBoundingClientRect(); return { x: ((event.clientX - rect.left) / rect.width) * 1800, y: ((event.clientY - rect.top) / rect.height) * 1100 }; }
+  beginDraw(event: PointerEvent) {
+    if (!this.drawTool()) return;
+    event.preventDefault();
+    const point = this.drawPoint(event);
+    if (this.drawTool() === 'text' || this.drawTool() === 'icon') { this.finishPointDraw(point, point); return; }
+    this.drawingState.set({ from: point, to: point });
+  }
+  moveDraw(event: PointerEvent) { if (this.drawingState()) this.drawingState.update((state) => state ? { ...state, to: this.drawPoint(event) } : state); }
+  endDraw(event: PointerEvent) { if (this.drawingState()) this.finishPointDraw(this.drawingState()!.from, this.drawPoint(event)); }
+  private finishPointDraw(from: { x: number; y: number }, to: { x: number; y: number }) {
+    const tool = this.drawTool();
+    if (!tool) return;
+    const base = { id: crypto.randomUUID(), color: '#7c3aed', opacity: 1 };
+    let item: DrawItem;
+    if (tool === 'text') item = { ...base, kind: 'text', position: to, text: window.prompt('Texto da anotação') || '', fontSize: 16 };
+    else if (tool === 'icon') item = { ...base, kind: 'icon', position: to, icon: 'sparkles' };
+    else item = { ...base, kind: tool, from, to, strokeWidth: 2 } as DrawItem;
+    if (item.kind === 'text' && !item.text) { this.drawingState.set(null); return; }
+    this.graphChange.emit({ ...this.graph(), drawings: [...(this.graph().drawings || []), item] });
+    this.drawingState.set(null);
   }
 }

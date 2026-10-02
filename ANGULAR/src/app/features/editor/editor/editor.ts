@@ -71,7 +71,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
         </div>
       }
       <div class="editor-layout" [class.info-panel-open]="infoPanelOpen()">
-        <section class="editor-main" [attr.inert]="busy() ? '' : null">
+        <section class="editor-main" [attr.inert]="busy() ? '' : null" (click)="closeContextMenu()">
           <div class="editor-toolbar">
             <button class="button secondary" (click)="addNode()">
               <app-icon name="plus" />Nova etapa</button
@@ -91,17 +91,30 @@ import { ShareDialog } from '../share-dialog/share-dialog';
               <app-icon name="redo" /></button
             ><span class="soft-badge"
               >{{ graph().nodes.length }} etapas · {{ graph().edges.length }} conexões</span
-            ><button class="icon-button" aria-label="Organizar mapa automaticamente" (click)="autoArrange()"><app-icon name="rotate" /></button><button class="icon-button" aria-label="Ajustar mapa à tela" (click)="fitMap()"><app-icon name="fit" /></button>
+            ><button class="icon-button" aria-label="Organizar mapa automaticamente" (click)="autoArrange()"><app-icon name="rotate" /></button><button class="icon-button" aria-label="Ajustar mapa à tela" (click)="fitMap()"><app-icon name="fit" /></button><span class="draw-tools" aria-label="Ferramentas de anotação">@for (tool of drawTools; track tool.value) { <button type="button" class="icon-button" [class.active]="drawTool() === tool.value" [attr.aria-label]="tool.label" (click)="drawTool.set(drawTool() === tool.value ? '' : tool.value)"><app-icon [name]="tool.icon" /></button> }</span>
           </div>
           <app-graph-canvas
             [graph]="graph()"
             [editable]="true"
             [selected]="selected()"
+            [selectedIds]="selectedIds()"
+            [drawTool]="drawTool()"
             (selectedChange)="select($event)"
+            (selectionChange)="selectMany($event)"
+            (contextMenu)="openContextMenu($event)"
             (graphChange)="change($event)"
             (edgeRemoved)="removeEdge($event)"
             (selectedEdgeChange)="selectEdge($event)"
           />
+          @if (contextMenu(); as menu) {
+            <div class="editor-context-menu" [style.left.px]="menu.x" [style.top.px]="menu.y" (click)="$event.stopPropagation()" role="menu">
+              <button type="button" role="menuitem" (click)="autoSizeSelection()"><app-icon name="fit" />Ajustar conteúdo</button>
+              <button type="button" role="menuitem" [disabled]="selectedIds().length < 2" (click)="groupSelection()"><app-icon name="layers" />Agrupar seleção</button>
+              <button type="button" role="menuitem" [disabled]="!selectedIds().length" (click)="ungroupSelection()"><app-icon name="layers" />Desagrupar</button>
+              <button type="button" role="menuitem" (click)="moveLayer('up')"><app-icon name="up" />Trazer para cima</button>
+              <button type="button" role="menuitem" (click)="moveLayer('down')"><app-icon name="down" />Enviar para baixo</button>
+            </div>
+          }
           <p class="editor-help">
             Arraste as etapas, puxe uma conexão entre os pontos e clique em uma linha para editar seu estilo. Botão direito remove a linha.
           </p>
@@ -212,6 +225,10 @@ export class Editor {
   readonly roadmap = signal<Roadmap | undefined>(undefined);
   readonly graph = signal<Graph>({ nodes: [], edges: [] });
   readonly selected = signal('');
+  readonly selectedIds = signal<string[]>([]);
+  readonly drawTool = signal<'' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'text' | 'icon'>('');
+  readonly drawTools = [{ value: 'line' as const, label: 'Desenhar reta', icon: 'minus' }, { value: 'arrow' as const, label: 'Desenhar seta', icon: 'arrow' }, { value: 'rectangle' as const, label: 'Desenhar quadrado', icon: 'square' }, { value: 'circle' as const, label: 'Desenhar círculo', icon: 'circle' }, { value: 'text' as const, label: 'Adicionar comentário', icon: 'edit' }, { value: 'icon' as const, label: 'Adicionar ícone', icon: 'sparkles' }];
+  readonly contextMenu = signal<{ x: number; y: number } | null>(null);
   readonly infoPanelOpen = signal(false);
   readonly selectedNode = computed(() => this.graph().nodes.find((n) => n.id === this.selected()));
   readonly selectedEdgeId = signal('');
@@ -278,6 +295,7 @@ export class Editor {
       this.baseline.set(JSON.stringify({ graph: r.graph, metadata: this.metadata() }));
       this.selected.set('');
       this.selectedEdgeId.set('');
+      this.selectedIds.set([]);
       this.inspectorDirty.set(false);
       this.undoStack.set([]);
       this.redoStack.set([]);
@@ -291,17 +309,40 @@ export class Editor {
   select(id: string) {
     this.inspectorDirty.set(false);
     this.selected.set(id);
+    this.selectedIds.set([id]);
     this.selectedEdgeId.set('');
   }
   selectEdge(id: string) {
     this.inspectorDirty.set(false);
     this.selected.set('');
     this.selectedEdgeId.set(id);
+    this.selectedIds.set([]);
   }
+  selectMany(ids: string[]) { this.selectedIds.set(ids); this.selected.set(ids.length === 1 ? ids[0] : ''); }
+  openContextMenu(menu: { x: number; y: number }) { this.contextMenu.set(menu); }
+  closeContextMenu() { this.contextMenu.set(null); }
   closeInspector() {
     this.selected.set('');
     this.selectedEdgeId.set('');
+    this.selectedIds.set([]);
     this.inspectorDirty.set(false);
+  }
+  autoSizeSelection() {
+    const ids = new Set(this.selectedIds().length ? this.selectedIds() : [this.selected()]);
+    this.change({ ...this.graph(), nodes: this.graph().nodes.map((node) => ids.has(node.id) ? { ...node, width: Math.min(600, Math.max(220, node.title.length * 8 + 118)), height: 96 } : node) });
+    this.closeContextMenu();
+  }
+  groupSelection() {
+    const ids = this.selectedIds();
+    if (ids.length < 2) return;
+    const groupId = crypto.randomUUID();
+    this.change({ ...this.graph(), nodes: this.graph().nodes.map((node) => ids.includes(node.id) ? { ...node, groupId } : node) });
+    this.closeContextMenu();
+  }
+  ungroupSelection() {
+    const ids = new Set(this.selectedIds());
+    this.change({ ...this.graph(), nodes: this.graph().nodes.map((node) => ids.has(node.id) ? { ...node, groupId: undefined } : node) });
+    this.closeContextMenu();
   }
   change(graph: Graph) {
     this.undoStack.update((s) => [...s.slice(-49), this.graph()]);
@@ -336,6 +377,7 @@ export class Editor {
       ],
     });
     this.selected.set(id);
+    this.selectedIds.set([id]);
   }
   updateNode(node: StudyNode) {
     this.change({
@@ -408,6 +450,7 @@ export class Editor {
     nodes[index].zIndex = nodes[target].zIndex || target;
     nodes[target].zIndex = current;
     this.change({ ...this.graph(), nodes });
+    this.closeContextMenu();
   }
   autoArrange() {
     const columns = Math.max(1, Math.ceil(Math.sqrt(this.graph().nodes.length)));
