@@ -70,7 +70,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
           }
         </div>
       }
-      <div class="editor-layout">
+      <div class="editor-layout" [class.info-panel-open]="infoPanelOpen()">
         <section class="editor-main" [attr.inert]="busy() ? '' : null">
           <div class="editor-toolbar">
             <button class="button secondary" (click)="addNode()">
@@ -122,11 +122,12 @@ import { ShareDialog } from '../share-dialog/share-dialog';
             </div>
           }
         </section>
-        <aside class="editor-inspector" [class.has-node]="!!selectedNode()" [class.has-edge]="!!selectedEdge()" [attr.inert]="busy() ? '' : null">
+        <aside class="editor-inspector" [class.has-node]="!!selectedNode()" [class.has-edge]="!!selectedEdge()" [class.info-open]="infoPanelOpen()" [attr.inert]="busy() ? '' : null">
           @if (selectedNode(); as node) {
             <app-node-inspector
               [node]="node"
               (changed)="updateNode($event)"
+              (closed)="closeInspector()"
               (draftChanged)="inspectorDirty.set($event)"
               (duplicate)="duplicateNode()"
               (remove)="removeNode()"
@@ -152,12 +153,15 @@ import { ShareDialog } from '../share-dialog/share-dialog';
               <label>Transparência <output>{{ math.round((edge.opacity || 1) * 100) }}%</output><input type="range" min="10" max="100" [value]="(edge.opacity || 1) * 100" (input)="setEdgeOpacity(edge.id, $event)" /></label>
               <button type="button" class="button danger full-width" (click)="removeEdge(edge.id)"><app-icon name="trash" />Excluir conexão</button>
             </section>
-          } @else {
-            <span class="tile blue"><app-icon name="map" /></span>
+          } @else if (infoPanelOpen()) {
+            <div class="info-panel-heading"><span class="tile blue"><app-icon name="map" /></span><button type="button" class="icon-button" aria-label="Fechar painel do mapa" (click)="infoPanelOpen.set(false)"><app-icon name="back" /></button></div>
             <h2 style="margin-top:15px">Seu mapa, suas ideias</h2>
             <p class="hint">Selecione uma etapa para editar seus detalhes e materiais de estudo.</p>
+          } @else {
+            <button type="button" class="inspector-reopen" aria-label="Abrir painel do mapa" (click)="infoPanelOpen.set(true)"><app-icon name="map" /><app-icon name="arrow" /></button>
           }
-          <details [open]="!selectedNode()">
+          @if (infoPanelOpen() && !selectedNode()) {
+          <details open>
             <summary>Sobre o roadmap</summary>
             <form>
               <label>Título<input [formField]="metadataFields.title" /></label
@@ -179,6 +183,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
                 <app-icon name="trash" />Excluir roadmap
               </button>
             </details>
+          }
           }
         </aside>
       </div>
@@ -207,6 +212,7 @@ export class Editor {
   readonly roadmap = signal<Roadmap | undefined>(undefined);
   readonly graph = signal<Graph>({ nodes: [], edges: [] });
   readonly selected = signal('');
+  readonly infoPanelOpen = signal(false);
   readonly selectedNode = computed(() => this.graph().nodes.find((n) => n.id === this.selected()));
   readonly selectedEdgeId = signal('');
   readonly selectedEdge = computed(() => this.graph().edges.find((edge) => edge.id === this.selectedEdgeId()));
@@ -291,6 +297,11 @@ export class Editor {
     this.inspectorDirty.set(false);
     this.selected.set('');
     this.selectedEdgeId.set(id);
+  }
+  closeInspector() {
+    this.selected.set('');
+    this.selectedEdgeId.set('');
+    this.inspectorDirty.set(false);
   }
   change(graph: Graph) {
     this.undoStack.update((s) => [...s.slice(-49), this.graph()]);

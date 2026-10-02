@@ -22,7 +22,7 @@ type InspectorPanel = 'content' | 'appearance' | 'icon' | 'size' | 'materials' |
 
     @if (panel(); as activePanel) {
       <section class="inspector-popover" [attr.data-panel]="activePanel" aria-live="polite">
-        <div class="popover-heading"><div><strong>{{ panelTitle(activePanel) }}</strong><span>Alterações salvas automaticamente</span></div><button type="button" class="icon-button" aria-label="Fechar propriedades" (click)="panel.set('')"><app-icon name="x" /></button></div>
+        <div class="popover-heading"><div><strong>{{ panelTitle(activePanel) }}</strong><span>Alterações salvas automaticamente</span></div><button type="button" class="icon-button" aria-label="Fechar propriedades" (click)="closed.emit()"><app-icon name="x" /></button></div>
 
         @if (activePanel === 'content') {
           <form novalidate>
@@ -67,6 +67,7 @@ export class NodeInspector {
   readonly math = Math;
   readonly node = input.required<StudyNode>();
   readonly changed = output<StudyNode>();
+  readonly closed = output<void>();
   readonly duplicate = output<void>();
   readonly remove = output<void>();
   readonly layerChange = output<'up' | 'down'>();
