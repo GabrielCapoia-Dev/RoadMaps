@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormField, form } from '@angular/forms/signals';
 import { Session } from '../../core/session';
 import { Notifications } from '../../core/notifications';
@@ -12,7 +12,7 @@ import { Tour } from '../../shared/tour/tour';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="skip-link" href="#main-content" (click)="skip($event)">Pular para o conteúdo</a>
-    <div class="app-shell">
+    <div class="app-shell" [class.editor-mode]="editorMode()">
       <aside class="sidebar" [class.mobile-open]="menu()">
         <a routerLink="/" class="brand-link" aria-label="BreadCrumbs — início"><app-brand /></a>
         <button class="icon-button mobile-close" aria-label="Fechar menu" (click)="menu.set(false)">
@@ -113,12 +113,19 @@ export class Shell {
   readonly notices = inject(Notifications);
   private router = inject(Router);
   readonly menu = signal(false);
+  readonly editorMode = signal(false);
   readonly tour = signal(false);
   readonly year = new Date().getFullYear();
   readonly searchModel = signal({ q: '' });
   readonly searchForm = form(this.searchModel);
   constructor() {
     void this.session.restore();
+    this.editorMode.set(this.router.url.startsWith('/editor/'));
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.editorMode.set(event.urlAfterRedirects.startsWith('/editor/'));
+      }
+    });
   }
   create() {
     this.menu.set(false);

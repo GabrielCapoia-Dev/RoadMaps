@@ -23,7 +23,7 @@ Alternativa local, nesta pasta: `npm ci`, `npm start`. O servidor em http://loca
 - `/comunidade`, `/pessoas/:id`, `/perfil`: busca de pessoas, perfis públicos, seguir/deixar de seguir e edição do próprio perfil.
 - `/ambiente`: diagnóstico técnico anterior, preservado.
 
-O editor usa salvamento explícito. Aplique os detalhes de uma etapa antes de salvar a trilha. O guard e o aviso do navegador protegem a saída com alterações; conflitos HTTP 409 mantêm o grafo local e oferecem baixar o rascunho ou recarregar. Metadados e grafo são duas operações versionadas: se somente a segunda falhar, a atualização dos metadados já persistiu. O salvamento não é colaboração em tempo real.
+O editor salva automaticamente alterações aplicadas após uma breve pausa, sem enviar uma requisição a cada movimento. O botão de salvar continua disponível para persistência imediata. O guard e o aviso do navegador protegem a saída com alterações; conflitos HTTP 409 mantêm o grafo local e oferecem baixar o rascunho ou recarregar. Metadados e grafo são duas operações versionadas: se somente a segunda falhar, a atualização dos metadados já persistiu. O salvamento não é colaboração em tempo real.
 
 ## Organização
 

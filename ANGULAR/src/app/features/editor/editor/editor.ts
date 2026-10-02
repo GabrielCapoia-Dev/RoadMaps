@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -97,6 +98,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
             [selected]="selected()"
             (selectedChange)="select($event)"
             (graphChange)="change($event)"
+            (edgeRemoved)="removeEdge($event)"
           />
           <p class="editor-help">
             Arraste as etapas e ligue os pontos para conectar ideias. Use os botões abaixo e o
@@ -121,7 +123,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
               </button>
             </div>
           }
-          <details class="panel" style="margin-top:22px">
+          <details class="panel editor-connection-panel" style="margin-top:22px">
             <summary>Conexões da trilha</summary>
             <form (submit)="connect($event)" style="margin-top:18px">
               <div class="two-fields">
@@ -155,7 +157,30 @@ import { ShareDialog } from '../share-dialog/share-dialog';
             <ul class="compact-list">
               @for (edge of graph().edges; track edge.id) {
                 <li>
-                  <span>{{ nodeTitle(edge.source) }} → {{ nodeTitle(edge.target) }}</span
+                  <span
+                    >{{ nodeTitle(edge.source) }} → {{ nodeTitle(edge.target) }}<small
+                      >Botão direito na linha remove a conexão</small
+                    ></span
+                  ><select
+                    [value]="connectionType(edge)"
+                    aria-label="Formato da conexão"
+                    (change)="setEdgeType(edge.id, $event)"
+                  >
+                    <option value="straight">Reta</option>
+                    <option value="segment">Ângulos</option>
+                    <option value="bezier">Curva</option>
+                    <option value="adaptive">Curva adaptativa</option>
+                  </select><select
+                    [value]="edge.color || '#7c91b8'"
+                    aria-label="Cor da conexão"
+                    (change)="setEdgeColor(edge.id, $event)"
+                  >
+                    <option value="#7c91b8">Cinza azul</option>
+                    <option value="#7c3aed">Violeta</option>
+                    <option value="#a855f7">Lilás</option>
+                    <option value="#d946ef">Roxo</option>
+                    <option value="#14b8a6">Turquesa</option>
+                  </select
                   ><button
                     class="icon-button"
                     aria-label="Remover conexão"
@@ -258,8 +283,14 @@ export class Editor {
   readonly error = signal('');
   readonly conflict = signal(false);
   readonly sharing = signal(false);
+  private autoSaveTimer: ReturnType<typeof setTimeout> | undefined;
   constructor() {
     void this.load();
+    effect(() => {
+      if (this.dirty() && !this.loading() && !this.busy() && !this.inspectorDirty()) {
+        this.scheduleAutoSave();
+      }
+    });
     const beforeUnload = (event: BeforeUnloadEvent) => {
       if (this.dirty()) {
         event.preventDefault();
@@ -267,7 +298,10 @@ export class Editor {
       }
     };
     window.addEventListener('beforeunload', beforeUnload);
-    this.destroyRef.onDestroy(() => window.removeEventListener('beforeunload', beforeUnload));
+    this.destroyRef.onDestroy(() => {
+      window.removeEventListener('beforeunload', beforeUnload);
+      if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+    });
   }
   async load() {
     this.loading.set(true);
@@ -370,11 +404,33 @@ export class Editor {
       return;
     this.change({
       ...this.graph(),
-      edges: [...this.graph().edges, { id: crypto.randomUUID(), source, target, type: 'path' }],
+      edges: [
+        ...this.graph().edges,
+        { id: crypto.randomUUID(), source, target, type: 'straight' },
+      ],
     });
   }
   removeEdge(id: string) {
     this.change({ ...this.graph(), edges: this.graph().edges.filter((e) => e.id !== id) });
+  }
+  connectionType(edge: Graph['edges'][number]) {
+    return ['straight', 'segment', 'bezier', 'adaptive'].includes(edge.type)
+      ? edge.type
+      : 'straight';
+  }
+  setEdgeType(id: string, event: Event) {
+    const type = (event.target as HTMLSelectElement).value;
+    this.change({
+      ...this.graph(),
+      edges: this.graph().edges.map((edge) => (edge.id === id ? { ...edge, type } : edge)),
+    });
+  }
+  setEdgeColor(id: string, event: Event) {
+    const color = (event.target as HTMLSelectElement).value;
+    this.change({
+      ...this.graph(),
+      edges: this.graph().edges.map((edge) => (edge.id === id ? { ...edge, color } : edge)),
+    });
   }
   nodeTitle(id: string) {
     return this.graph().nodes.find((n) => n.id === id)?.title ?? '';
@@ -395,7 +451,13 @@ export class Editor {
     this.redoStack.set(stack.slice(0, -1));
     this.inspectorDirty.set(false);
   }
-  async save() {
+  private scheduleAutoSave() {
+    if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+    this.autoSaveTimer = setTimeout(() => {
+      if (this.dirty() && !this.inspectorDirty()) void this.save(true);
+    }, 1200);
+  }
+  async save(automatic = false) {
     if (this.busy() || !this.metadataFields().valid() || this.inspectorDirty()) return;
     this.busy.set(true);
     this.error.set('');
@@ -422,7 +484,7 @@ export class Editor {
       });
       this.roadmap.set({ ...r, access });
       this.baseline.set(JSON.stringify({ graph, metadata }));
-      this.notices.show('Roadmap salvo. Mais um passo construído.');
+      if (!automatic) this.notices.show('Roadmap salvo. Mais um passo construído.');
     } catch (e) {
       this.error.set(errorMessage(e));
       this.conflict.set(e instanceof HttpErrorResponse && e.status === 409);

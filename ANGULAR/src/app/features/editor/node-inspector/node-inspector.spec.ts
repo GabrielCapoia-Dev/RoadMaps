@@ -31,6 +31,10 @@ describe('Node inspector drafts', () => {
     expect(fixture.componentInstance.hasDraft()).toBe(true);
     fixture.componentInstance.apply(new Event('submit'));
     await fixture.whenStable();
-    expect(changed).toHaveBeenCalledWith({ ...node, title: 'Uma nova ideia' });
+    expect(changed).toHaveBeenCalledWith({
+      ...node,
+      title: 'Uma nova ideia',
+      shape: 'rounded',
+    });
   });
 });

@@ -30,7 +30,22 @@ import { Icon } from '../../../shared/icon/icon';
           }
         </select></label
       ><label>Descrição<textarea rows="4" [formField]="fields.description"></textarea></label
-      ><label>Cor de destaque<input type="color" [formField]="fields.color" /></label
+      ><label
+        >Formato do card<select [formField]="fields.shape">
+          <option value="rounded">Arredondado</option>
+          <option value="square">Quadrado suave</option>
+          <option value="pill">Pílula</option>
+          <option value="outlined">Contorno</option>
+          <option value="compact">Compacto</option>
+        </select></label
+      ><label
+        >Cor predefinida<select [formField]="fields.color">
+          <option value="#7c3aed">Violeta</option>
+          <option value="#a855f7">Lilás</option>
+          <option value="#d946ef">Roxo magenta</option>
+          <option value="#2563eb">Azul</option>
+          <option value="#14b8a6">Turquesa</option>
+        </select></label
       ><label class="checkbox-label"
         ><input type="checkbox" [formField]="fields.required" />Etapa essencial</label
       >
@@ -103,6 +118,7 @@ export class NodeInspector {
     type: 'module',
     required: true,
     color: '#7c3aed',
+    shape: 'rounded',
     x: 0,
     y: 0,
   });
@@ -136,6 +152,7 @@ export class NodeInspector {
         type: n.type,
         required: n.required,
         color: n.color ?? '#7c3aed',
+        shape: n.shape ?? 'rounded',
         x: n.position.x,
         y: n.position.y,
       };
@@ -162,6 +179,7 @@ export class NodeInspector {
         type: m.type,
         required: m.required,
         color: m.color,
+        shape: m.shape,
         position: { x: m.x, y: m.y },
       });
     });

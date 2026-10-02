@@ -25,7 +25,11 @@ import { Icon } from '../icon/icon';
             [fConnectionId]="edge.id"
             [fSourceId]="edge.source + '-out'"
             [fTargetId]="edge.target + '-in'"
+            [fType]="connectionType(edge)"
             [fReassignDisabled]="true"
+            [attr.data-edge-type]="connectionType(edge)"
+            [style.--edge-color]="edge.color || '#7c91b8'"
+            (contextmenu)="removeConnection($event, edge.id)"
           />
         }
         @for (node of graph().nodes; track node.id) {
@@ -35,6 +39,7 @@ import { Icon } from '../icon/icon';
             [fNodeId]="node.id"
             [fNodePosition]="node.position"
             [fNodeDraggingDisabled]="!editable()"
+            [attr.data-shape]="node.shape || 'rounded'"
             class="graph-node"
             [class.selected]="selected() === node.id"
             [style.--node-color]="node.color || '#7c3aed'"
@@ -110,6 +115,7 @@ export class GraphCanvas {
   readonly selected = input('');
   readonly graphChange = output<Graph>();
   readonly selectedChange = output<string>();
+  readonly edgeRemoved = output<string>();
   readonly canvas = viewChild(FCanvasComponent);
   readonly zoom = viewChild(FZoomDirective);
   private fitted = false;
@@ -143,7 +149,18 @@ export class GraphCanvas {
       return;
     this.graphChange.emit({
       ...this.graph(),
-      edges: [...this.graph().edges, { id: crypto.randomUUID(), source, target, type: 'path' }],
+      edges: [...this.graph().edges, { id: crypto.randomUUID(), source, target, type: 'straight' }],
     });
+  }
+  connectionType(edge: Graph['edges'][number]) {
+    return ['straight', 'segment', 'bezier', 'adaptive'].includes(edge.type)
+      ? edge.type
+      : 'straight';
+  }
+  removeConnection(event: MouseEvent, id: string) {
+    if (!this.editable()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.edgeRemoved.emit(id);
   }
 }
