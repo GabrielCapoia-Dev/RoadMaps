@@ -122,7 +122,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
             </div>
           }
         </section>
-        <aside class="editor-inspector" [attr.inert]="busy() ? '' : null">
+        <aside class="editor-inspector" [class.has-node]="!!selectedNode()" [class.has-edge]="!!selectedEdge()" [attr.inert]="busy() ? '' : null">
           @if (selectedNode(); as node) {
             <app-node-inspector
               [node]="node"

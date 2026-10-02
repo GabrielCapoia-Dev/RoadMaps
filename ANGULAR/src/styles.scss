@@ -251,6 +251,11 @@ small {
   flex-direction: column;
   padding: 14px 18px;
 }
+.app-shell.editor-mode .editor-main app-graph-canvas {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+}
 .app-shell.editor-mode .editor-main .graph-surface {
   flex: 1 1 auto;
   height: 100%;
@@ -271,7 +276,15 @@ small {
 .app-shell.editor-mode .editor-inspector {
   height: 100%;
   max-height: none;
-  overflow: auto;
+  overflow: visible;
+  display: block;
+  padding: 22px;
+}
+.app-shell.editor-mode .editor-inspector.has-node {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  padding: 14px 0 14px 10px;
 }
 .topbar {
   height: 83px;
@@ -1717,7 +1730,7 @@ app-tour p {
   max-height: calc(100vh - 170px);
   overflow: auto;
 }
-.app-shell.editor-mode .editor-inspector {
+.app-shell.editor-mode .editor-inspector.has-node {
   position: relative;
   overflow: visible;
   display: flex;
