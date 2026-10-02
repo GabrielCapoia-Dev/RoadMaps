@@ -52,7 +52,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
           }
           <button
             class="button primary"
-            [disabled]="busy() || !dirty() || !metadataFields().valid() || inspectorDirty()"
+            [disabled]="busy() || !dirty() || !metadataFields().valid()"
             (click)="save()"
           >
             <app-icon name="save" />{{ busy() ? 'Salvando…' : 'Salvar alterações' }}
@@ -95,7 +95,7 @@ import { ShareDialog } from '../share-dialog/share-dialog';
           </div>
           <app-graph-canvas
             [graph]="graph()"
-            [editable]="!inspectorDirty()"
+            [editable]="true"
             [selected]="selected()"
             (selectedChange)="select($event)"
             (graphChange)="change($event)"
@@ -105,9 +105,6 @@ import { ShareDialog } from '../share-dialog/share-dialog';
           <p class="editor-help">
             Arraste as etapas, puxe uma conexão entre os pontos e clique em uma linha para editar seu estilo. Botão direito remove a linha.
           </p>
-          @if (inspectorDirty()) {
-            <p class="hint">Aplique os detalhes da etapa antes de salvar o roadmap.</p>
-          }
           <div class="editor-node-choices" aria-label="Selecionar etapa">
             @for (node of graph().nodes; track node.id) {
               <button [class.active]="selected() === node.id" (click)="select(node.id)">
@@ -244,7 +241,7 @@ export class Editor {
   constructor() {
     void this.load();
     effect(() => {
-      if (this.dirty() && !this.loading() && !this.busy() && !this.inspectorDirty()) {
+      if (this.dirty() && !this.loading() && !this.busy()) {
         this.scheduleAutoSave();
       }
     });
@@ -286,14 +283,11 @@ export class Editor {
     }
   }
   select(id: string) {
-    if (this.inspectorDirty() && !confirm('Descartar os detalhes ainda não aplicados desta etapa?'))
-      return;
     this.inspectorDirty.set(false);
     this.selected.set(id);
     this.selectedEdgeId.set('');
   }
   selectEdge(id: string) {
-    if (this.inspectorDirty()) return;
     this.inspectorDirty.set(false);
     this.selected.set('');
     this.selectedEdgeId.set(id);
@@ -304,7 +298,6 @@ export class Editor {
     this.graph.set(graph);
   }
   addNode() {
-    if (this.inspectorDirty() && !confirm('Descartar os detalhes ainda não aplicados?')) return;
     const id = crypto.randomUUID();
     this.change({
       ...this.graph(),
@@ -436,7 +429,7 @@ export class Editor {
     }, 1200);
   }
   async save(automatic = false) {
-    if (this.busy() || !this.metadataFields().valid() || this.inspectorDirty()) return;
+    if (this.busy() || !this.metadataFields().valid()) return;
     this.busy.set(true);
     this.error.set('');
     this.conflict.set(false);

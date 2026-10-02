@@ -146,6 +146,7 @@ export class GraphCanvas {
       nodes: this.graph().nodes.map((n) => ({
         ...n,
         position: event.nodes.find((m) => m.id === n.id)?.position ?? n.position,
+        layout: n.layout ?? 'horizontal',
       })),
     });
   }
